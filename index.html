@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>書体見本帳</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<style>
+/*
+VOICE: 静かな道具。紙の見本帳のように、字そのものが主役
+IDEA: 活版の書体見本帳。校正の朱だけが色を持つ
+PICTURE: 見本の字が並ぶ一覧そのもの
+COLOUR and TYPE: 生成りの紙と墨、朱の差し色。UIは BIZ UDPGothic
+LAYOUT: 上に操作の帯、下に見本のカード。600px未満は1列
+*/
+:root{color-scheme:light dark;--bg:light-dark(#f7f5ef,#161513);--card:light-dark(#fffefb,#1f1e1b);--ink:light-dark(#171615,#ecebe5);--sub:light-dark(#6c6860,#a29e94);--line:light-dark(#dedad0,#36342f);--aka:light-dark(#d23a1f,#ff6a4d);--guide:light-dark(#e9b9ad,#6e3a30)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "BIZ UDPGothic",system-ui,sans-serif;overflow-x:clip}
+button,input,select,textarea{font:inherit;color:inherit}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:12px max(4vw,14px) 10px}
+h1{font-size:22px;line-height:1.1;margin:0 0 10px;font-weight:700;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+h1 small{font-size:13px;color:var(--sub);font-weight:400}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.row+.row{margin-top:8px}
+textarea,input[type=text],input[type=search],select{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:16px}
+textarea{flex:1 1 320px;min-height:46px;height:68px;resize:vertical}
+input[type=search]{flex:1 1 160px}
+.btn,.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:0 14px;min-height:40px;cursor:pointer;white-space:nowrap}
+.btn[aria-pressed=true],.chip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{border:0;background:var(--card);min-height:40px;padding:0 14px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--aka);color:#fff}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.chips .chip{flex:none;min-height:34px;font-size:14px}
+label.size{display:flex;gap:6px;align-items:center;font-size:14px;color:var(--sub)}
+input[type=range]{width:120px;accent-color:var(--aka)}
+:focus-visible{outline:2px solid var(--aka);outline-offset:2px}
+main{padding:16px max(4vw,14px) 40px}
+h2{font-size:15px;color:var(--sub);font-weight:400;margin:18px 0 8px;display:flex;gap:8px;align-items:center}
+h2 b{color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px}
+.card.pinned{border-color:var(--aka)}
+.meta{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--sub)}
+.meta .nm{color:var(--ink);font-size:14px;font-weight:700;margin-right:auto;overflow-wrap:anywhere}
+.ic{white-space:nowrap;border:1px solid transparent;background:none;min-width:40px;min-height:40px;border-radius:8px;cursor:pointer;color:var(--sub);font-size:14px}
+.ic:hover{border-color:var(--line)}
+.ic.on{color:var(--aka);font-weight:700}
+.fav{font-size:20px}
+.tags{display:flex;gap:4px;flex-wrap:wrap}
+.tag{font-size:12px;border:1px solid var(--line);border-radius:4px;padding:0 6px;color:var(--sub)}
+.sample{line-height:1.45;overflow-wrap:anywhere;white-space:pre-wrap;transition:opacity .3s;opacity:.12}
+.sample.ok{opacity:1}
+.sample.vert{writing-mode:vertical-rl;max-height:22em;overflow-x:auto}
+.inv .sample,.inv .cell{background:#111;color:#f3f2ec}
+.inv .sample{padding:10px;border-radius:8px}
+.status{font-size:12px;color:var(--aka)}
+.hand{display:flex;flex-wrap:wrap;gap:6px}
+.cell{width:var(--c,112px);height:var(--c,112px);display:grid;place-items:center;font-size:calc(var(--c,112px)*.82);line-height:1;border:1px solid var(--guide);position:relative;background:var(--card);opacity:.12;transition:opacity .3s}
+.cell.ok{opacity:1}
+.cell::before{content:"";position:absolute;inset:0;background:linear-gradient(var(--guide),var(--guide)) center/1px 100% no-repeat,linear-gradient(var(--guide),var(--guide)) center/100% 1px no-repeat;opacity:.7;pointer-events:none}
+.cell.nogrid::before{display:none}
+.over{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:start}
+.over .big{--c:min(64vw,300px)}
+.over .big span{position:absolute;inset:0;display:grid;place-items:center;opacity:.28}
+.legend{display:flex;flex-direction:column;gap:6px;font-size:14px}
+.legend label{display:flex;gap:8px;align-items:center;min-height:32px}
+@media(max-width:600px){.over{grid-template-columns:1fr}h1{font-size:20px}header{position:static}.ic{min-width:36px;padding:0 4px}}
+.mine textarea{height:auto;min-height:40px;font-size:14px;width:100%}
+.mine select{font-size:14px;padding:6px 8px}
+.empty{color:var(--sub);font-size:15px;padding:20px 0}
+.links{margin-top:28px;border-top:1px solid var(--line);padding-top:8px}
+.links summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center}
+.links ul{padding-left:1.2em;margin:6px 0 14px}
+.links li{margin:6px 0}
+.links a{color:var(--aka)}
+.links p{color:var(--sub);font-size:14px;margin:4px 0}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:999px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
+#toast.show{opacity:1}
+@media(prefers-reduced-motion:reduce){.sample,.cell{transition:none}}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <h1>書体見本帳 <small id="count"></small></h1>
+  <div class="row">
+    <textarea id="text" aria-label="見本の文"></textarea>
+    <div class="seg" role="group" aria-label="表示">
+      <button id="vList" aria-pressed="true">一覧</button><button id="vHand" aria-pressed="false">手書き参考</button>
+    </div>
+  </div>
+  <div class="row">
+    <input type="search" id="q" placeholder="書体名で検索" aria-label="書体名で検索">
+    <label class="size">大きさ <input type="range" id="size" min="14" max="96" value="32"></label>
+    <button class="btn" id="vert" aria-pressed="false">縦書き</button>
+    <button class="btn" id="inv" aria-pressed="false">白黒反転</button>
+    <button class="btn" id="grid" aria-pressed="true">補助線</button>
+    <label class="btn" style="display:inline-flex;align-items:center">＋フォントを追加<input type="file" id="file" accept=".ttf,.otf,.woff,.woff2" multiple class="hide"></label>
+  </div>
+  <div class="row"><div class="chips" id="chips"></div></div>
+</header>
+<main>
+  <section id="overSec" class="hide">
+    <h2><b>重ね表示</b> ★とピンの書体を半透明で重ねます。濃く残る線がどの書体にも共通する骨組みです</h2>
+    <div class="over"><div class="cell big ok" id="bigCell"></div><div><div class="row" id="overChars"></div><div class="legend" id="legend"></div></div></div>
+  </section>
+  <section id="pinSec" class="hide"><h2><b>ピン留め</b> いま比べている候補</h2><div class="grid" id="pinGrid"></div></section>
+  <section><h2 id="mainH"><b>すべての書体</b></h2><div class="grid" id="mainGrid"></div><p class="empty hide" id="empty">条件に合う書体がありません。</p></section>
+  <details class="links" open>
+    <summary>フリーフォントを探せる場所</summary>
+    <p>ダウンロードした .ttf / .otf は「＋フォントを追加」で読み込めます。このiPadのブラウザ内に保存され、次からも一覧に出ます。使う前に、各配布ページの利用条件（商用・同人誌での利用など）を必ず確かめてください。</p>
+    <ul>
+      <li><a href="http://fontfree.me/">FONTFREE</a> — 日本語フリーフォントの投稿・検索サイト。カテゴリ・商用可否・収録文字で探せる</li>
+      <li><a href="https://fontbear.net/">FONT BEAR</a> — 商用利用できるフリーフォントだけを集めた検索サイト</li>
+      <li><a href="https://forest.watch.impress.co.jp/library/nav/genre/home/postcard_font.html">窓の杜 フォントライブラリ</a> — 手書き・明朝・マンガ向けなどの配布フォントを紹介</li>
+      <li><a href="https://www.ne.jp/asahi/krk/kct/font/script.htm">フォントの館（手書きの間）</a> — 手書き系フォントを利用条件つきで一覧にした個人サイト</li>
+      <li><a href="https://googlefonts.github.io/japanese">Google Fonts + 日本語</a> — この見本帳に最初から入っている書体の配布元</li>
+    </ul>
+    <p><b>マンガのセリフ向け（アンチゴチ）</b></p>
+    <ul>
+      <li><a href="http://okoneya.jp/font/">源暎フォント置き場</a> — 源暎アンチック（マンガのセリフ向け）、源暎ラテゴ（テレビや放送の声向け）、源暎ぽっぷる など</li>
+      <li><a href="http://www.fontna.com/blog/1122/">やさしさアンチック（フォントな）</a> — 明朝体かな＋ゴシック体漢字の吹き出し向け書体</li>
+      <li><a href="https://forest.watch.impress.co.jp/docs/news/1398480.html">びぜんアンチック（紹介記事）</a> — BIZ UDゴシックの漢字とZEN アンチックのかなを組み合わせた書体</li>
+    </ul>
+  </details>
+</main>
+<div id="toast" role="status"></div>
+<script>
+{
+// 分類: g ゴシック / m 明朝 / r 丸 / a アンチゴチ / h 手書き / f 筆・楷書 / p ポップ / d 個性派 / dot ドット / t 手本向き
+const CATS=[['all','すべて'],['fav','★お気に入り'],['mine','自分のフォント'],['t','手書きの手本向き'],['g','ゴシック'],['m','明朝'],['r','丸ゴシック'],['a','アンチック'],['h','手書き風'],['f','筆・楷書'],['p','ポップ'],['d','個性派'],['dot','ドット']];
+const TAGN=Object.fromEntries(CATS);
+const G=[['Noto Sans JP','g'],['Noto Serif JP','m'],['BIZ UDPGothic','g'],['BIZ UDGothic','g'],['BIZ UDPMincho','m'],['BIZ UDMincho','m'],['M PLUS 1p','g'],['M PLUS 1','g'],['M PLUS 2','g'],['M PLUS Rounded 1c','r'],['M PLUS 1 Code','g'],['Kosugi','g'],['Kosugi Maru','r'],['Sawarabi Gothic','g'],['Sawarabi Mincho','m'],['Zen Kaku Gothic New','g'],['Zen Kaku Gothic Antique','g'],['Zen Maru Gothic','r'],['Zen Old Mincho','m'],['Zen Antique','m a'],['Zen Antique Soft','m a'],['Zen Kurenaido','h t'],['Shippori Mincho','m'],['Shippori Mincho B1','m'],['Shippori Antique','a'],['Shippori Antique B1','a'],['Kaisei Opti','m'],['Kaisei Tokumin','m d'],['Kaisei Decol','m d'],['Kaisei HarunoUmi','m'],['Hina Mincho','m'],['Aoboshi One','m d'],['New Tegomin','m h'],['Murecho','g'],['IBM Plex Sans JP','g'],['LINE Seed JP','g'],['Tsukimi Rounded','r'],['Kiwi Maru','r'],['Klee One','h t'],['Yomogi','h'],['Yusei Magic','h p'],['Hachi Maru Pop','p h'],['Slackside One','h'],['Darumadrop One','p h'],['Yuji Syuku','f t'],['Yuji Mai','f'],['Yuji Boku','f'],['Yuji Hentaigana Akari','f'],['Yuji Hentaigana Akebono','f'],['Mochiy Pop One','p'],['Mochiy Pop P One','p'],['Potta One','p'],['Cherry Bomb One','p'],['Dela Gothic One','d'],['RocknRoll One','d'],['Reggae One','d'],['Rampart One','d'],['Train One','d'],['Stick','d'],['Monomaniac One','d'],['Chokokutai','d'],['Shizuru','d'],['WDXL Lubrifont JP N','d'],['DotGothic16','dot']];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ls={get(k,d){try{const v=localStorage.getItem('mihon:'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('mihon:'+k,JSON.stringify(v))}catch(e){}}};
+const S={text:ls.get('text','吹き出しに入れるセリフ\nあいうえお アイウエオ 永遠の書'),size:ls.get('size',32),view:ls.get('view','list'),cat:ls.get('cat','all'),q:'',vert:ls.get('vert',false),inv:ls.get('inv',false),grid:ls.get('grid',true),fav:new Set(ls.get('fav',[])),pin:new Set(ls.get('pin',[])),over:new Set(ls.get('over',[])),overCh:0};
+let fonts=G.map(([n,t])=>({id:'g:'+n,name:n,fam:n,tags:t.split(' '),src:'google',lic:'OFLなど（Google Fonts）'}));
+const loaded={};
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),1600)}
+function save(){ls.set('text',S.text);ls.set('size',S.size);ls.set('view',S.view);ls.set('cat',S.cat);ls.set('vert',S.vert);ls.set('inv',S.inv);ls.set('grid',S.grid);ls.set('fav',[...S.fav]);ls.set('pin',[...S.pin]);ls.set('over',[...S.over])}
+function ensure(f){
+  if(loaded[f.id])return loaded[f.id];
+  if(f.src==='google'){const l=document.createElement('link');l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family='+encodeURIComponent(f.name).replace(/%20/g,'+')+'&display=swap';document.head.appendChild(l);
+    loaded[f.id]=new Promise(res=>{l.onload=()=>document.fonts.load('32px "'+f.fam+'"',handChars().join('')+S.text.slice(0,60)).then(a=>res(a.length>0),()=>res(false));l.onerror=()=>res(false)})}
+  else loaded[f.id]=Promise.resolve(true);
+  return loaded[f.id]}
+function markWhenReady(f,root){ensure(f).then(ok=>{root.querySelectorAll('.sample,.cell').forEach(e=>e.classList.add('ok'));if(!ok){const s=root.querySelector('.status');if(s)s.textContent='読み込めませんでした'}})}
+const io=new IntersectionObserver(es=>{for(const e of es)if(e.isIntersecting){io.unobserve(e.target);const f=fonts.find(x=>x.id===e.target.dataset.id);if(f)markWhenReady(f,e.target)}},{rootMargin:'400px'});
+function handChars(){const c=[...S.text.replace(/\s/g,'')];return c.slice(0,6)}
+function visible(){const q=S.q.trim().toLowerCase();return fonts.filter(f=>(S.cat==='all'||(S.cat==='fav'?S.fav.has(f.id):S.cat==='mine'?f.src==='mine':f.tags.includes(S.cat)))&&(!q||f.name.toLowerCase().includes(q)))}
+function body(f){
+  const st='font-family:"'+esc(f.fam)+'"';
+  if(S.view==='hand')return '<div class="hand" style="--c:'+Math.max(56,S.size*2.4)+'px">'+handChars().map(c=>'<div class="cell'+(S.grid?'':' nogrid')+'" style=\''+st+'\'>'+esc(c)+'</div>').join('')+'</div>';
+  return '<div class="sample'+(S.vert?' vert':'')+'" style=\''+st+';font-size:'+S.size+'px\'>'+esc(S.text)+'</div>'}
+function card(f){
+  const fav=S.fav.has(f.id),pin=S.pin.has(f.id);
+  const mine=f.src==='mine'?'<div class="mine"><select data-act="tag" aria-label="分類">'+CATS.slice(3).map(([k,n])=>'<option value="'+k+'"'+(f.tags[1]===k?' selected':'')+'>'+n+'</option>').join('')+'</select> <textarea data-act="memo" placeholder="利用条件のメモ（例：商用OK・同人誌は要クレジット）" aria-label="利用条件のメモ">'+esc(f.lic)+'</textarea></div>':'';
+  return '<article class="card'+(pin?' pinned':'')+'" data-id="'+esc(f.id)+'"><div class="meta"><span class="nm">'+esc(f.name)+'</span><button class="ic fav'+(fav?' on':'')+'" data-act="fav" aria-label="お気に入り" aria-pressed="'+fav+'">'+(fav?'★':'☆')+'</button><button class="ic'+(pin?' on':'')+'" data-act="pin" aria-pressed="'+pin+'">ピン</button><button class="ic" data-act="copy">コピー</button>'+(f.src==='mine'?'<button class="ic" data-act="del">削除</button>':'')+'</div><div class="tags">'+f.tags.filter(t=>t!=='mine').map(t=>'<span class="tag">'+esc(TAGN[t]||t)+'</span>').join('')+(f.src==='google'?'<span class="tag">'+esc(f.lic)+'</span>':'')+'<span class="status"></span></div>'+body(f)+mine+'</article>'}
+function render(){
+  document.body.classList.toggle('inv',S.inv);
+  $('#vList').setAttribute('aria-pressed',S.view==='list');$('#vHand').setAttribute('aria-pressed',S.view==='hand');
+  $('#vert').setAttribute('aria-pressed',S.vert);$('#inv').setAttribute('aria-pressed',S.inv);$('#grid').setAttribute('aria-pressed',S.grid);
+  $('#vert').classList.toggle('hide',S.view==='hand');$('#grid').classList.toggle('hide',S.view!=='hand');
+  $('#chips').innerHTML=CATS.map(([k,n])=>'<button class="chip" data-cat="'+k+'" aria-pressed="'+(S.cat===k)+'">'+n+'</button>').join('');
+  const vis=visible(),pins=fonts.filter(f=>S.pin.has(f.id));
+  $('#pinSec').classList.toggle('hide',!pins.length);
+  $('#pinGrid').innerHTML=pins.map(card).join('');
+  $('#mainGrid').innerHTML=vis.filter(f=>!S.pin.has(f.id)).map(card).join('');
+  $('#empty').classList.toggle('hide',vis.length>0);
+  $('#mainH').innerHTML='<b>'+esc(TAGN[S.cat])+'</b> '+vis.length+'書体';
+  $('#count').textContent=fonts.length+'書体を収録';
+  document.querySelectorAll('.card').forEach(c=>io.observe(c));
+  renderOver()}
+function renderOver(){
+  const pool=fonts.filter(f=>S.fav.has(f.id)||S.pin.has(f.id));
+  const show=S.view==='hand'&&pool.length>0;$('#overSec').classList.toggle('hide',!show);if(!show)return;
+  const ch=handChars();if(S.overCh>=ch.length)S.overCh=0;
+  const on=pool.filter(f=>!S.over.has(f.id));
+  $('#overChars').innerHTML=ch.map((c,i)=>'<button class="chip" data-och="'+i+'" aria-pressed="'+(i===S.overCh)+'">'+esc(c)+'</button>').join('');
+  $('#legend').innerHTML=pool.map(f=>'<label><input type="checkbox" data-oid="'+esc(f.id)+'"'+(S.over.has(f.id)?'':' checked')+'> <span style=\'font-family:"'+esc(f.fam)+'"\'>'+esc(ch[S.overCh]||'')+'</span> '+esc(f.name)+'</label>').join('');
+  const b=$('#bigCell');b.classList.toggle('nogrid',!S.grid);
+  b.innerHTML=on.map(f=>'<span style=\'font-family:"'+esc(f.fam)+'"\'>'+esc(ch[S.overCh]||'')+'</span>').join('');
+  pool.forEach(f=>ensure(f))}
+// 自分のフォント（IndexedDB）
+let dbp=null;
+function db(){if(dbp)return dbp;dbp=new Promise((res,rej)=>{try{const r=indexedDB.open('shotai-mihoncho',1);r.onupgradeneeded=()=>r.result.createObjectStore('fonts',{keyPath:'id'});r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}});return dbp}
+async function dbDo(mode,fn){const d=await db();return new Promise((res,rej)=>{const tx=d.transaction('fonts',mode);const st=tx.objectStore('fonts');const r=fn(st);tx.oncomplete=()=>res(r&&r.result);tx.onerror=()=>rej(tx.error)})}
+async function addMine(rec,persist){
+  const fam='mine-'+rec.id.replace(/[^a-z0-9]/gi,'');
+  try{const ff=new FontFace(fam,rec.data);await ff.load();document.fonts.add(ff)}catch(e){toast(rec.name+' は読み込めませんでした');return false}
+  fonts=fonts.filter(f=>f.id!==rec.id);
+  fonts.unshift({id:rec.id,name:rec.name,fam,tags:['mine',rec.tag||'g'],src:'mine',lic:rec.lic||''});
+  if(persist){try{await dbDo('readwrite',st=>st.put(rec))}catch(e){toast('保存できませんでした（このページを閉じると消えます）')}}
+  return true}
+$('#file').addEventListener('change',async e=>{let n=0;for(const file of e.target.files){const rec={id:'m:'+file.name+':'+file.size,name:file.name.replace(/\.(ttf|otf|woff2?)$/i,''),data:await file.arrayBuffer(),tag:'g',lic:''};if(await addMine(rec,true))n++}e.target.value='';if(n){S.cat='mine';render();toast(n+'書体を追加しました')}});
+async function upd(id,patch){const f=fonts.find(x=>x.id===id);if(!f)return;try{const rec=await dbDo('readonly',st=>st.get(id));if(rec)await dbDo('readwrite',st=>st.put(Object.assign(rec,patch)))}catch(e){}}
+// 操作
+document.addEventListener('click',async e=>{
+  const c=e.target.closest('[data-cat]');if(c){S.cat=c.dataset.cat;save();render();return}
+  const o=e.target.closest('[data-och]');if(o){S.overCh=+o.dataset.och;renderOver();return}
+  const b=e.target.closest('[data-act]');if(!b||b.tagName==='SELECT'||b.tagName==='TEXTAREA')return;
+  const id=b.closest('.card').dataset.id,f=fonts.find(x=>x.id===id),a=b.dataset.act;
+  if(a==='fav'){S.fav.has(id)?S.fav.delete(id):S.fav.add(id);save();render()}
+  if(a==='pin'){S.pin.has(id)?S.pin.delete(id):S.pin.add(id);save();render();if(S.pin.has(id))toast('一番上にピン留めしました')}
+  if(a==='copy'){try{await navigator.clipboard.writeText(f.name);toast('「'+f.name+'」をコピーしました')}catch(err){toast('コピーできませんでした')}}
+  if(a==='del'){if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='もう一度で削除';return}try{await dbDo('readwrite',st=>st.delete(id))}catch(err){}fonts=fonts.filter(x=>x.id!==id);S.fav.delete(id);S.pin.delete(id);save();render();toast('削除しました')}});
+document.addEventListener('change',e=>{const t=e.target;if(t.dataset.act==='tag'){const id=t.closest('.card').dataset.id,f=fonts.find(x=>x.id===id);f.tags=['mine',t.value];upd(id,{tag:t.value});render()}
+  if(t.dataset.oid){t.checked?S.over.delete(t.dataset.oid):S.over.add(t.dataset.oid);save();renderOver()}});
+document.addEventListener('input',e=>{const t=e.target;if(t.dataset.act==='memo'){const id=t.closest('.card').dataset.id,f=fonts.find(x=>x.id===id);f.lic=t.value;clearTimeout(t._h);t._h=setTimeout(()=>upd(id,{lic:t.value}),400)}});
+const txt=$('#text');txt.value=S.text;
+txt.addEventListener('input',()=>{S.text=txt.value;save();clearTimeout(txt._h);txt._h=setTimeout(()=>{if(S.view==='hand')render();else{document.querySelectorAll('.sample').forEach(s=>s.textContent=S.text)}},150)});
+$('#q').addEventListener('input',e=>{S.q=e.target.value;clearTimeout(e.target._h);e.target._h=setTimeout(render,150)});
+const sz=$('#size');sz.value=S.size;sz.addEventListener('input',()=>{S.size=+sz.value;save();if(S.view==='hand')render();else document.querySelectorAll('.sample').forEach(s=>s.style.fontSize=S.size+'px')});
+$('#vList').onclick=()=>{S.view='list';save();render()};$('#vHand').onclick=()=>{S.view='hand';save();render()};
+$('#vert').onclick=()=>{S.vert=!S.vert;save();render()};$('#inv').onclick=()=>{S.inv=!S.inv;save();render()};$('#grid').onclick=()=>{S.grid=!S.grid;save();render()};
+render();
+dbDo('readonly',st=>st.getAll()).then(async recs=>{for(const r of recs||[])await addMine(r,false);if(recs&&recs.length)render()}).catch(()=>{});
+}
+</script>
+</body>
+</html>
