@@ -62,12 +62,12 @@ h2 b{color:var(--ink)}
 h2 .btn{margin-left:auto;min-height:36px;font-size:14px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:12px}
 .card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px 12px;display:flex;flex-direction:column;gap:6px}
-.card.pinned{border-color:var(--aka)}
 .card.loading::after{content:"";position:absolute;left:12px;right:12px;top:0;height:2px;background:linear-gradient(90deg,transparent,var(--aka),transparent) 0 0/40% 100% no-repeat;animation:ld 1.1s linear infinite}
 @keyframes ld{from{background-position:-60% 0}to{background-position:160% 0}}
 .meta{display:flex;align-items:center;gap:2px}
 .nmw{margin-right:auto;display:flex;flex-direction:column;line-height:1.3;padding:2px 0}
-.nm{font-size:14px;font-weight:700;overflow-wrap:anywhere}
+.nm{font-size:14px;font-weight:700;overflow-wrap:anywhere;background:none;border:0;padding:6px 0;margin:0;color:inherit;text-align:left;cursor:pointer;font-family:inherit;min-height:36px}
+.nm:hover{text-decoration:underline}
 .sub{font-size:12px;color:var(--sub)}
 .ic{white-space:nowrap;border:1px solid transparent;background:none;min-width:40px;min-height:40px;border-radius:8px;cursor:pointer;color:var(--sub);font-size:14px}
 .ic:hover{border-color:var(--line)}
@@ -77,9 +77,11 @@ h2 .btn{margin-left:auto;min-height:36px;font-size:14px}
 .warns:empty{display:none}
 .tag{font-size:12px;border:1px solid var(--line);border-radius:4px;padding:0 6px;color:var(--sub)}
 .tag.warn{border-color:var(--aka);color:var(--aka)}
-.moreBox{border-top:1px solid var(--line);padding-top:8px;display:flex;flex-direction:column;gap:8px;font-size:14px}
-.moreBox textarea{height:auto;min-height:40px;font-size:14px;width:100%}
-.moreBox select{font-size:14px;padding:6px 8px}
+#infoBody{display:flex;flex-direction:column;gap:10px;font-size:14px}
+#infoBody textarea{height:auto;min-height:40px;font-size:14px;width:100%;font-family:inherit}
+#infoBody select{font-size:14px;padding:6px 8px}
+#infoBody .big{font-size:30px;line-height:1.4;padding:10px 0;font-synthesis:none;overflow-wrap:anywhere}
+#infoBody a{color:var(--aka)}
 .sample,.cell,.btxt,.over .big span{font-synthesis:none}
 .sample{line-height:1.45;overflow-wrap:anywhere;white-space:pre-wrap;transition:opacity .3s;opacity:.12}
 .sample.vert{writing-mode:vertical-rl;max-height:22em;overflow-x:auto}
@@ -117,7 +119,6 @@ h2 .btn{margin-left:auto;min-height:36px;font-size:14px}
 /* 吹き出し表示のときは原稿用紙 */
 body.paper main{background-color:light-dark(#fff,#1a1a19);background-image:linear-gradient(var(--blue) 1px,transparent 1px),linear-gradient(90deg,var(--blue) 1px,transparent 1px);background-size:28px 28px}
 body.paper .card{--card:light-dark(#fff,#1a1a19);background:transparent;border-color:transparent}
-body.paper .card.pinned{border:1px dashed var(--aka)}
 body.paper .nm{font-weight:400;color:var(--sub)}
 /* その他 */
 .empty{color:var(--sub);font-size:15px;padding:20px 0}
@@ -164,7 +165,7 @@ dialog textarea{width:100%;height:160px;font-size:13px;font-family:ui-monospace,
     <button class="btn" id="grid" aria-pressed="true">補助線</button>
     <label class="btn">＋フォントを追加<input type="file" id="file" accept=".ttf,.otf,.woff,.woff2" multiple class="hide"></label>
     <button class="btn" id="comboBtn" aria-pressed="false">組み合わせを作る</button>
-    <button class="btn" id="dataBtn">★とピンの書き出し・読み込み</button>
+    <button class="btn" id="dataBtn">★の書き出し・読み込み</button>
   </div>
   <div id="bubRow" class="hide">
     <div class="row">
@@ -190,10 +191,10 @@ dialog textarea{width:100%;height:160px;font-size:13px;font-family:ui-monospace,
 </section>
 <main>
   <section id="overSec" class="hide">
-    <h2><b>重ね表示</b> ★とピンの書体を半透明で重ねます。濃く残る線がどの書体にも共通する骨組みです</h2>
+    <h2><b>重ね表示</b> ★の書体を半透明で重ねます。濃く残る線がどの書体にも共通する骨組みです</h2>
     <div class="over"><div class="cell big" id="bigCell"></div><div><div class="row" id="overChars"></div><div class="legend" id="legend"></div></div></div>
   </section>
-  <section id="pinSec" class="hide"><h2><b>ピン留め</b> いま比べている候補</h2><div class="grid" id="pinGrid"></div></section>
+  
   <section><h2 id="mainH"></h2><div class="grid" id="mainGrid"></div><p class="empty hide" id="empty"></p></section>
   <details class="links">
     <summary>フリーフォントを探せる場所</summary>
@@ -218,8 +219,9 @@ dialog textarea{width:100%;height:160px;font-size:13px;font-family:ui-monospace,
     <p>PixelMplus（ドット）は配布条件が再配布自由のため、この見本帳に同梱しています。</p>
   </details>
 </main>
+<dialog id="infoDlg"><div id="infoBody"></div><div class="row" style="margin-top:12px"><button class="btn" id="iClose">閉じる</button></div></dialog>
 <dialog id="dataDlg">
-  <h3>★とピンの書き出し・読み込み</h3>
+  <h3>★の書き出し・読み込み</h3>
   <p>別の端末やブラウザに移すときに使います。下の文字をコピーして、移した先の「読み込む」に貼り付けてください。追加したフォントのファイルそのものは含まれません。</p>
   <textarea id="dataTxt" aria-label="書き出したデータ"></textarea>
   <div class="row">
@@ -245,8 +247,8 @@ const ls={get(k,d){try{const v=localStorage.getItem('mihon:'+k);return v==null?d
 const DEF={text:'吹き出しに入れるセリフ\nあいうえお アイウエオ 永遠の書',size:32,view:'list',cat:'all',vert:false,bvert:true,bt:'oval',tail:'br',balign:'center',wght:400,bsize:22,bfix:false,bmax:16,bw:180,inv:false,grid:true,panel:true,combos:[]};
 const S={q:'',overCh:0,combo:false};
 for(const k in DEF)S[k]=ls.get(k,DEF[k]);
-for(const k of ['fav','pin','over'])S[k]=new Set(ls.get(k,[]));
-function save(){for(const k in DEF)ls.set(k,S[k]);for(const k of ['fav','pin','over'])ls.set(k,[...S[k]])}
+for(const k of ['fav','over'])S[k]=new Set(ls.get(k,[]));ls.get('pin',[]).forEach(x=>S.fav.add(x));ls.set('pin',[]);
+function save(){for(const k in DEF)ls.set(k,S[k]);for(const k of ['fav','over'])ls.set(k,[...S[k]])}
 let fonts=G.map(([n,t])=>({id:'g:'+n,name:n,fam:n,tags:t.split(' ').concat(W[n]?['w']:[]),src:'google',lic:'OFLなど（Google Fonts）',w:W[n]||''}))
   .concat(B.map(([n,t,u])=>({id:'b:'+n,name:n,fam:'bundled-'+n,tags:t.split(' '),src:'bundled',url:u,lic:'M+ FONTSライセンス（改変・再配布・商用可）'})));
 const byId=id=>fonts.find(f=>f.id===id);
@@ -352,14 +354,21 @@ function body(f){
   if(S.view==='hand'){const miss=missMap[f.id]||[];return '<div class="hand" style="--c:'+Math.max(56,S.size*2.4)+'px">'+handChars().map(c=>'<div class="cell'+(S.grid?'':' nogrid')+(miss.includes(c)?' miss':'')+'" style="'+ff(famFor(f,c))+wt+'">'+esc(c)+'</div>').join('')+'</div>'}
   if(S.view==='bub')return '<div class="bubwrap"><div class="bub b-'+S.bt+(S.bvert?' vert':'')+(S.bfix?' fix':'')+(S.balign==='top'?' top':'')+'" style="'+bubDim()+'"><svg class="shape" aria-hidden="true"></svg><div class="btxt" style="'+ff(f.fam)+wt+';font-size:'+S.bsize+'px;--n:'+bubN()+'"><span class="bin">'+txtHTML(f,S.text)+'</span></div></div></div>';
   return '<div class="sample'+(S.vert?' vert':'')+'" style="'+ff(f.fam)+wt+';font-size:'+S.size+'px">'+txtHTML(f,S.text)+'</div>'}
-const openMore=new Set();
+function srcLink(f){if(f.src==='google')return '<a href="https://fonts.google.com/specimen/'+encodeURIComponent(f.name).replace(/%20/g,'+')+'" target="_blank" rel="noopener">Google Fontsのページ（ダウンロードもここから）</a>';
+  if(f.src==='bundled')return '<a href="https://itouhiro.github.io/PixelMplus/" target="_blank" rel="noopener">配布元：PixelMplus</a>';
+  if(f.src==='combo')return f.parts.map(srcLink).join('<br>');return ''}
+function openInfo(f){
+  const sub=f.src==='combo'?'組み合わせ':f.src==='mine'?'マイフォント':f.tags.filter(t=>t!=='w').map(t=>TAGN[t]).join('・')+(f.w?'・'+wShort(f):'');
+  let h='<div data-id="'+esc(f.id)+'"><h3>'+esc(f.name)+'</h3><div class="big" style="'+(f.src==='combo'?'':ff(f.fam))+';font-weight:'+S.wght+'">'+(f.src==='combo'?txtHTML(f,S.text.split('\n')[0]):esc(S.text.split('\n')[0]))+'</div>'
+   +'<div class="row">'+(sub?'<span class="tag">'+esc(sub)+'</span>':'')+(f.src!=='mine'?'<span class="tag">'+esc(f.lic)+'</span>':'')+'</div>'
+   +(srcLink(f)?'<div>'+srcLink(f)+'</div>':'')
+   +'<div class="row"><button class="btn" data-act="copy">名前をコピー</button>'+(f.src==='mine'||f.src==='combo'?'<button class="btn" data-act="del">削除</button>':'')+'</div>';
+  if(f.src==='mine')h+='<label>分類 <select data-act="tag" aria-label="分類">'+CATS.slice(5).map(([k,n])=>'<option value="'+k+'"'+(f.tags[1]===k?' selected':'')+'>'+n+'</option>').join('')+'</select></label><textarea data-act="memo" placeholder="利用条件のメモ（例：商用OK・同人誌は要クレジット）" aria-label="利用条件のメモ">'+esc(f.lic)+'</textarea>';
+  $('#infoBody').innerHTML=h+'</div>';ensure(f);$('#infoDlg').showModal()}
 function card(f){
-  const fav=S.fav.has(f.id),pin=S.pin.has(f.id),more=openMore.has(f.id);
-  const sub=f.src==='combo'?'組み合わせ':f.src==='mine'?'マイフォント・'+(TAGN[f.tags[1]]||''):f.tags.filter(t=>t!=='w').map(t=>TAGN[t]).join('・')+(f.w?'・'+wShort(f):'');
+  const fav=S.fav.has(f.id);
   const warn=(!hasW(f,S.wght)?'<span class="tag warn" data-w="wt">'+S.wght+'はなし（近い太さで表示）</span>':'');
-  let box='<div class="row">'+(sub?'<span class="tag">'+esc(sub)+'</span>':'')+'<span class="tag">'+esc(f.lic)+'</span></div><div class="row"><button class="btn" data-act="copy">名前をコピー</button>'+(f.src==='mine'||f.src==='combo'?'<button class="btn" data-act="del">削除</button>':'')+'</div>';
-  if(f.src==='mine')box+='<div class="row"><select data-act="tag" aria-label="分類">'+CATS.slice(5).map(([k,n])=>'<option value="'+k+'"'+(f.tags[1]===k?' selected':'')+'>'+n+'</option>').join('')+'</select></div><textarea data-act="memo" placeholder="利用条件のメモ（例：商用OK・同人誌は要クレジット）" aria-label="利用条件のメモ">'+esc(f.lic)+'</textarea>';
-  return '<article class="card loading'+(pin?' pinned':'')+'" data-id="'+esc(f.id)+'"><div class="meta"><div class="nmw"><span class="nm">'+esc(f.name)+'</span></div><button class="ic fav'+(fav?' on':'')+'" data-act="fav" aria-label="お気に入り" aria-pressed="'+fav+'">'+(fav?'★':'☆')+'</button><button class="ic'+(pin?' on':'')+'" data-act="pin" aria-pressed="'+pin+'">ピン</button><button class="ic" data-act="more" aria-expanded="'+more+'" aria-label="詳しく">…</button></div><div class="warns">'+warn+'</div>'+body(f)+'<div class="moreBox'+(more?'':' hide')+'">'+box+'</div></article>'}
+  return '<article class="card loading" data-id="'+esc(f.id)+'"><div class="meta"><div class="nmw"><button class="nm" data-act="info" aria-label="'+esc(f.name)+'の詳しい情報">'+esc(f.name)+'</button></div><button class="ic fav'+(fav?' on':'')+'" data-act="fav" aria-label="お気に入り" aria-pressed="'+fav+'">'+(fav?'★':'☆')+'</button></div><div class="warns">'+warn+'</div>'+body(f)+'</article>'}
 function render(){
   document.body.classList.toggle('inv',S.inv);document.body.classList.toggle('paper',S.view==='bub');
   $('#panel').classList.toggle('hide',!S.panel);$('#panelBtn').setAttribute('aria-expanded',S.panel);
@@ -373,10 +382,8 @@ function render(){
   $('#vert').classList.toggle('hide',S.view==='hand');$('#grid').classList.toggle('hide',S.view!=='hand');
   $('#comboBtn').setAttribute('aria-pressed',S.combo);$('#comboBox').classList.toggle('hide',!S.combo);
   $('#chips').innerHTML=CATS.map(([k,n])=>'<button class="chip" data-cat="'+k+'" aria-pressed="'+(S.cat===k)+'">'+n+'</button>').join('');
-  const vis=visible(),pins=fonts.filter(f=>S.pin.has(f.id));
-  $('#pinSec').classList.toggle('hide',!pins.length);
-  $('#pinGrid').innerHTML=pins.map(card).join('');
-  $('#mainGrid').innerHTML=vis.filter(f=>!S.pin.has(f.id)).map(card).join('');
+  const vis=visible();
+  $('#mainGrid').innerHTML=vis.map(card).join('');
   const ttl=TAGN[S.cat]+(S.q.trim()?'「'+S.q.trim()+'」':'');
   $('#mainH').innerHTML='<b>'+esc(ttl)+'</b> '+vis.length+'書体';
   $('#empty').textContent='条件に合う書体がありません。';$('#empty').classList.toggle('hide',vis.length>0);
@@ -384,7 +391,7 @@ function render(){
   $$('.card').forEach(c=>{io.observe(c);fitBub(c)});watchBubs();
   renderOver()}
 function renderOver(){
-  const pool=fonts.filter(f=>S.fav.has(f.id)||S.pin.has(f.id));
+  const pool=fonts.filter(f=>S.fav.has(f.id));
   const show=S.view==='hand'&&pool.length>0;$('#overSec').classList.toggle('hide',!show);if(!show)return;
   const ch=handChars();if(S.overCh>=ch.length)S.overCh=0;const c=ch[S.overCh]||'';
   $('#overChars').innerHTML=ch.map((x,i)=>'<button class="chip" data-och="'+i+'" aria-pressed="'+(i===S.overCh)+'">'+esc(x)+'</button>').join('');
@@ -407,11 +414,11 @@ async function addMine(rec,persist){
 async function upd(id,patch){try{const rec=await dbDo('readonly',st=>st.get(id));if(rec)await dbDo('readwrite',st=>st.put(Object.assign(rec,patch)))}catch(e){}}
 $('#file').addEventListener('change',async e=>{let n=0;for(const file of e.target.files){const rec={id:'m:'+file.name+':'+file.size,name:file.name.replace(/\.(ttf|otf|woff2?)$/i,''),data:await file.arrayBuffer(),tag:'g',lic:''};if(await addMine(rec,true))n++}e.target.value='';if(n){buildCombos();fillComboSelects();S.cat='mine';S.cmp=false;render();toast(n+'書体を追加しました')}});
 // 書き出し・読み込み
-function exportData(){return JSON.stringify({app:'shotai-mihoncho',v:1,fav:[...S.fav],pin:[...S.pin],over:[...S.over],combos:S.combos},null,1)}
+function exportData(){return JSON.stringify({app:'shotai-mihoncho',v:1,fav:[...S.fav],over:[...S.over],combos:S.combos},null,1)}
 function importData(txt){let d;try{d=JSON.parse(txt)}catch(e){toast('読み込めませんでした（形式が違います）');return}
   const arr=x=>Array.isArray(x)?x.filter(v=>typeof v==='string'):[];
   if(!d||d.app!=='shotai-mihoncho'){toast('この見本帳のデータではありません');return}
-  arr(d.fav).forEach(x=>S.fav.add(x));arr(d.pin).forEach(x=>S.pin.add(x));S.over=new Set(arr(d.over));
+  arr(d.fav).forEach(x=>S.fav.add(x));arr(d.pin).forEach(x=>S.fav.add(x));S.over=new Set(arr(d.over));
   if(Array.isArray(d.combos))for(const c of d.combos)if(Array.isArray(c)&&c.length===2&&c.every(v=>typeof v==='string')&&!S.combos.some(x=>x[0]===c[0]&&x[1]===c[1]))S.combos.push(c);
   buildCombos();save();render();$('#dataDlg').close();toast('読み込みました')}
 // 操作
@@ -424,19 +431,18 @@ document.addEventListener('click',async e=>{
   const al=t.closest('[data-al]');if(al){S.balign=al.dataset.al;save();render();return}
   const o=t.closest('[data-och]');if(o){S.overCh=+o.dataset.och;renderOver();return}
   const b=t.closest('[data-act]');if(!b||b.tagName==='SELECT'||b.tagName==='TEXTAREA')return;
-  const card=b.closest('.card'),id=card.dataset.id,f=byId(id),a=b.dataset.act;
+  const card=b.closest('[data-id]'),id=card.dataset.id,f=byId(id),a=b.dataset.act;
   if(a==='fav'){S.fav.has(id)?S.fav.delete(id):S.fav.add(id);save();render()}
-  if(a==='pin'){S.pin.has(id)?S.pin.delete(id):S.pin.add(id);save();render();if(S.pin.has(id))toast('一番上にピン留めしました')}
-  if(a==='more'){const box=card.querySelector('.moreBox');const open=box.classList.toggle('hide')===false;open?openMore.add(id):openMore.delete(id);b.setAttribute('aria-expanded',open)}
+  if(a==='info'){openInfo(f);return}
   if(a==='copy'){try{await navigator.clipboard.writeText(f.src==='combo'?f.parts[0].name+' / '+f.parts[1].name:f.name);toast('名前をコピーしました')}catch(err){toast('コピーできませんでした')}}
   if(a==='del'){if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='もう一度押すと削除';return}
     if(f.src==='mine'){try{await dbDo('readwrite',st=>st.delete(id))}catch(err){}fonts=fonts.filter(x=>x.id!==id)}
     else S.combos=S.combos.filter(([x,y])=>'c:'+x+'|'+y!==id);
-    S.fav.delete(id);S.pin.delete(id);buildCombos();fillComboSelects();save();render();toast('削除しました')}});
+    S.fav.delete(id);buildCombos();fillComboSelects();save();render();$('#infoDlg').close();toast('削除しました')}});
 document.addEventListener('change',e=>{const t=e.target;
-  if(t.dataset.act==='tag'){const id=t.closest('.card').dataset.id,f=byId(id);f.tags=['mine',t.value];upd(id,{tag:t.value});render()}
+  if(t.dataset.act==='tag'){const id=t.closest('[data-id]').dataset.id,f=byId(id);f.tags=['mine',t.value];upd(id,{tag:t.value});render()}
   if(t.dataset.oid){t.checked?S.over.delete(t.dataset.oid):S.over.add(t.dataset.oid);save();renderOver()}});
-document.addEventListener('input',e=>{const t=e.target;if(t.dataset.act==='memo'){const id=t.closest('.card').dataset.id,f=byId(id);f.lic=t.value;clearTimeout(t._h);t._h=setTimeout(()=>upd(id,{lic:t.value}),400)}});
+document.addEventListener('input',e=>{const t=e.target;if(t.dataset.act==='memo'){const id=t.closest('[data-id]').dataset.id,f=byId(id);f.lic=t.value;clearTimeout(t._h);t._h=setTimeout(()=>upd(id,{lic:t.value}),400)}});
 const txt=$('#text');txt.value=S.text;
 txt.addEventListener('input',()=>{S.text=txt.value;save();clearTimeout(txt._h);txt._h=setTimeout(()=>{
   if(S.view==='hand')render();
@@ -459,12 +465,14 @@ $('#bw').addEventListener('input',e=>{S.bw=+e.target.value;$('#bwv').textContent
 $('#panelBtn').onclick=()=>{const p=$('#panel');if(S.panel&&p.getBoundingClientRect().bottom<0){window.scrollTo({top:0,behavior:'smooth'});return}S.panel=!S.panel;save();render()};
 $('#comboBtn').onclick=()=>{S.combo=!S.combo;if(S.combo)fillComboSelects();render()};
 $('#cAdd').onclick=()=>{const a=$('#cKana').value,k=$('#cKanji').value;if(!a||!k)return;if(a===k){toast('かなと漢字に別の書体を選んでください');return}
-  const id='c:'+a+'|'+k;if(!S.combos.some(([x,y])=>x===a&&y===k))S.combos.push([a,k]);buildCombos();S.pin.add(id);save();render();toast('組み合わせをピン留めしました')};
+  const id='c:'+a+'|'+k;if(!S.combos.some(([x,y])=>x===a&&y===k))S.combos.push([a,k]);buildCombos();S.fav.add(id);save();render();toast('組み合わせを作って★を付けました')};
 if(!/github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname))$('#dSave').classList.add('hide');
 $('#dataBtn').onclick=()=>{$('#dataTxt').value=exportData();$('#dataDlg').showModal()};
 $('#dClose').onclick=()=>$('#dataDlg').close();
 $('#dCopy').onclick=async()=>{try{await navigator.clipboard.writeText($('#dataTxt').value);toast('コピーしました')}catch(e){$('#dataTxt').select();toast('選択しました。長押しでコピーしてください')}};
 $('#dSave').onclick=()=>{try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([$('#dataTxt').value],{type:'application/json'}));a.download='shotai-mihoncho.json';document.body.appendChild(a);a.click();a.remove()}catch(e){toast('保存できませんでした。コピーを使ってください')}};
+$('#iClose').onclick=()=>$('#infoDlg').close();
+$('#infoDlg').addEventListener('click',e=>{if(e.target.id==='infoDlg')e.target.close()});
 $('#dLoad').onclick=()=>importData($('#dataTxt').value);
 $('#dFile').addEventListener('change',async e=>{const f=e.target.files[0];if(f)importData(await f.text());e.target.value=''});
 buildCombos();render();
