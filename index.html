@@ -252,11 +252,16 @@ function save(){for(const k in DEF)ls.set(k,S[k]);for(const k of ['fav','over'])
 let fonts=G.map(([n,t])=>({id:'g:'+n,name:n,fam:n,tags:t.split(' ').concat(W[n]?['w']:[]),src:'google',lic:'OFLなど（Google Fonts）',w:W[n]||''}))
   .concat(B.map(([n,t,u])=>({id:'b:'+n,name:n,fam:'bundled-'+n,tags:t.split(' '),src:'bundled',url:u,lic:'M+ FONTSライセンス（改変・再配布・商用可）'})));
 // 端末に入っている書体（ファイルは配らず、表示だけ借りる）。入っていない端末では出さない
-const L=[['Hiragino Sans','ヒラギノ角ゴ（この端末）','g']];
+// [候補の書体名（端末によって名前が違う）, 表示名, 分類, 太さを選べるか]
+const L=[[['Hiragino Sans'],'ヒラギノ角ゴ','g',1],[['Hiragino Mincho ProN'],'ヒラギノ明朝','m',1],[['Hiragino Maru Gothic ProN'],'ヒラギノ丸ゴ','r',0],
+  [['Yu Gothic','YuGothic'],'游ゴシック','g',1],[['Yu Mincho','YuMincho'],'游明朝','m',1],[['Meiryo'],'メイリオ','g',0],[['MS Gothic'],'MSゴシック','g',0],[['MS Mincho'],'MS明朝','m',0],
+  [['Klee'],'クレー','t',1],[['Tsukushi A Round Gothic'],'筑紫A丸ゴシック','r',1],[['Tsukushi B Round Gothic'],'筑紫B丸ゴシック','r',1]];
 function hasLocal(fam){// 「その書体, serif」と「その書体, monospace」を絵にして比べる。書体があれば両方同じ絵になる
   const c=document.createElement('canvas');c.width=360;c.height=60;const x=c.getContext('2d'),img=f=>{x.clearRect(0,0,360,60);x.font='40px '+f;x.textBaseline='middle';x.fillText('永あRg',4,30);return x.getImageData(0,0,360,60).data.join()};
-  return img("'"+fam+"', serif")===img("'"+fam+"', monospace")&&img('serif')!==img('monospace')}
-L.forEach(([fam,name,t])=>{if(hasLocal(fam))fonts.splice(0,0,{id:'l:'+fam,name,fam,tags:[t,'w'],src:'local',lic:'端末に入っている書体（表示だけ借りる。ファイルは配らない）'})});
+  const me=img("'"+fam+"', serif");if(me!==img("'"+fam+"', monospace")||img('serif')===img('monospace'))return false;
+  // Linuxなどでは、無い書体名が別の書体に自動で置き換わることがある。よくある置き換え先と同じ絵なら偽物
+  return !['Noto Sans CJK JP','Noto Sans Mono CJK JP','Noto Serif CJK JP','IPAGothic','IPAPGothic','IPAMincho','IPAexGothic','IPAexMincho','VL Gothic','TakaoGothic','Droid Sans Fallback'].some(a=>a!==fam&&img("'"+a+"', serif")===me)}
+L.slice().reverse().forEach(([names,name,t,w])=>{const fam=names.find(hasLocal);if(fam)fonts.splice(0,0,{id:'l:'+names[0],name:name+'（この端末）',fam,tags:w?[t,'w']:[t],src:'local',lic:'端末に入っている書体（表示だけ借りる。ファイルは配らない）'})});
 const byId=id=>fonts.find(f=>f.id===id);
 function mkCombo([a,b]){const A=byId(a),K=byId(b);if(!A||!K)return null;return{id:'c:'+a+'|'+b,name:'かな '+A.name+' ＋ 漢字 '+K.name,fam:K.fam,parts:[A,K],tags:['combo'],src:'combo',lic:'それぞれの書体の利用条件に従う'}}
 function buildCombos(){fonts=fonts.filter(f=>f.src!=='combo').concat(S.combos.map(mkCombo).filter(Boolean))}
