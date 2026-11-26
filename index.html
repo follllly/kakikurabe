@@ -119,12 +119,17 @@ h2 b{color:var(--ink)}
       <li><a href="https://www.ne.jp/asahi/krk/kct/font/script.htm">フォントの館（手書きの間）</a> — 手書き系フォントを利用条件つきで一覧にした個人サイト</li>
       <li><a href="https://googlefonts.github.io/japanese">Google Fonts + 日本語</a> — この見本帳に最初から入っている書体の配布元</li>
     </ul>
-    <p><b>マンガのセリフ向け（アンチゴチ）</b></p>
+    <p><b>おすすめのフリーフォント</b>（配布元でダウンロード →「＋フォントを追加」）</p>
     <ul>
-      <li><a href="http://okoneya.jp/font/">源暎フォント置き場</a> — 源暎アンチック（マンガのセリフ向け）、源暎ラテゴ（テレビや放送の声向け）、源暎ぽっぷる など</li>
-      <li><a href="http://www.fontna.com/blog/1122/">やさしさアンチック（フォントな）</a> — 明朝体かな＋ゴシック体漢字の吹き出し向け書体</li>
-      <li><a href="https://forest.watch.impress.co.jp/docs/news/1398480.html">びぜんアンチック（紹介記事）</a> — BIZ UDゴシックの漢字とZEN アンチックのかなを組み合わせた書体</li>
+      <li><a href="http://okoneya.jp/font/">源暎アンチック</a> — マンガのセリフ向けアンチゴチ。OFL（商用・同人誌も可）</li>
+      <li><a href="http://okoneya.jp/font/">源暎ラテゴ</a> — テレビや校内放送など「機械を通した声」向け。OFL</li>
+      <li><a href="http://okoneya.jp/font/">源暎ぽっぷる</a> — 丁寧な手書き感のあるPOP体風</li>
+      <li><a href="https://forest.watch.impress.co.jp/docs/news/1398480.html">びぜんアンチック</a> — 00年代の少年誌・同人誌の雰囲気のアンチゴチ。OFL（紹介記事から配布元へ）</li>
+      <li><a href="http://www.fontna.com/blog/1122/">やさしさアンチック</a> — 明朝体かな＋ゴシック体漢字。商用可（埋め込み・改変再配布に条件あり）</li>
+      <li><a href="https://www.ne.jp/asahi/krk/kct/font/script.htm">851手書き雑フォント</a> — 雑に書いた手書き風。商用可・改造再配布自由（掲載ページから配布元へ）</li>
+      <li><a href="https://github.com/saltcandy123/saltcandy123font">saltcandy123font</a> — 個人の手書きをフォント化したもの（漢字は一部のみ）</li>
     </ul>
+    <p>PixelMplus（ドット）は配布条件が再配布自由のため、この見本帳に同梱しています。</p>
   </details>
 </main>
 <div id="toast" role="status"></div>
@@ -138,7 +143,8 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ls={get(k,d){try{const v=localStorage.getItem('mihon:'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('mihon:'+k,JSON.stringify(v))}catch(e){}}};
 const S={text:ls.get('text','吹き出しに入れるセリフ\nあいうえお アイウエオ 永遠の書'),size:ls.get('size',32),view:ls.get('view','list'),cat:ls.get('cat','all'),q:'',vert:ls.get('vert',false),inv:ls.get('inv',false),grid:ls.get('grid',true),fav:new Set(ls.get('fav',[])),pin:new Set(ls.get('pin',[])),over:new Set(ls.get('over',[])),overCh:0};
-let fonts=G.map(([n,t])=>({id:'g:'+n,name:n,fam:n,tags:t.split(' '),src:'google',lic:'OFLなど（Google Fonts）'}));
+const B=[['PixelMplus10','dot','fonts/pixelmplus/PixelMplus10-Regular.ttf'],['PixelMplus12','dot','fonts/pixelmplus/PixelMplus12-Regular.ttf']];
+let fonts=G.map(([n,t])=>({id:'g:'+n,name:n,fam:n,tags:t.split(' '),src:'google',lic:'OFLなど（Google Fonts）'})).concat(B.map(([n,t,u])=>({id:'b:'+n,name:n,fam:'bundled-'+n,tags:t.split(' '),src:'bundled',url:u,lic:'M+ FONTSライセンス（改変・再配布・商用可）'})));
 const loaded={};
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),1600)}
 function save(){ls.set('text',S.text);ls.set('size',S.size);ls.set('view',S.view);ls.set('cat',S.cat);ls.set('vert',S.vert);ls.set('inv',S.inv);ls.set('grid',S.grid);ls.set('fav',[...S.fav]);ls.set('pin',[...S.pin]);ls.set('over',[...S.over])}
@@ -146,6 +152,7 @@ function ensure(f){
   if(loaded[f.id])return loaded[f.id];
   if(f.src==='google'){const l=document.createElement('link');l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family='+encodeURIComponent(f.name).replace(/%20/g,'+')+'&display=swap';document.head.appendChild(l);
     loaded[f.id]=new Promise(res=>{l.onload=()=>document.fonts.load('32px "'+f.fam+'"',handChars().join('')+S.text.slice(0,60)).then(a=>res(a.length>0),()=>res(false));l.onerror=()=>res(false)})}
+  else if(f.src==='bundled'){loaded[f.id]=new FontFace(f.fam,'url('+f.url+')').load().then(ff=>{document.fonts.add(ff);return true},()=>false)}
   else loaded[f.id]=Promise.resolve(true);
   return loaded[f.id]}
 function markWhenReady(f,root){ensure(f).then(ok=>{root.querySelectorAll('.sample,.cell').forEach(e=>e.classList.add('ok'));if(!ok){const s=root.querySelector('.status');if(s)s.textContent='読み込めませんでした'}})}
@@ -159,7 +166,7 @@ function body(f){
 function card(f){
   const fav=S.fav.has(f.id),pin=S.pin.has(f.id);
   const mine=f.src==='mine'?'<div class="mine"><select data-act="tag" aria-label="分類">'+CATS.slice(3).map(([k,n])=>'<option value="'+k+'"'+(f.tags[1]===k?' selected':'')+'>'+n+'</option>').join('')+'</select> <textarea data-act="memo" placeholder="利用条件のメモ（例：商用OK・同人誌は要クレジット）" aria-label="利用条件のメモ">'+esc(f.lic)+'</textarea></div>':'';
-  return '<article class="card'+(pin?' pinned':'')+'" data-id="'+esc(f.id)+'"><div class="meta"><span class="nm">'+esc(f.name)+'</span><button class="ic fav'+(fav?' on':'')+'" data-act="fav" aria-label="お気に入り" aria-pressed="'+fav+'">'+(fav?'★':'☆')+'</button><button class="ic'+(pin?' on':'')+'" data-act="pin" aria-pressed="'+pin+'">ピン</button><button class="ic" data-act="copy">コピー</button>'+(f.src==='mine'?'<button class="ic" data-act="del">削除</button>':'')+'</div><div class="tags">'+f.tags.filter(t=>t!=='mine').map(t=>'<span class="tag">'+esc(TAGN[t]||t)+'</span>').join('')+(f.src==='google'?'<span class="tag">'+esc(f.lic)+'</span>':'')+'<span class="status"></span></div>'+body(f)+mine+'</article>'}
+  return '<article class="card'+(pin?' pinned':'')+'" data-id="'+esc(f.id)+'"><div class="meta"><span class="nm">'+esc(f.name)+'</span><button class="ic fav'+(fav?' on':'')+'" data-act="fav" aria-label="お気に入り" aria-pressed="'+fav+'">'+(fav?'★':'☆')+'</button><button class="ic'+(pin?' on':'')+'" data-act="pin" aria-pressed="'+pin+'">ピン</button><button class="ic" data-act="copy">コピー</button>'+(f.src==='mine'?'<button class="ic" data-act="del">削除</button>':'')+'</div><div class="tags">'+f.tags.filter(t=>t!=='mine').map(t=>'<span class="tag">'+esc(TAGN[t]||t)+'</span>').join('')+(f.src!=='mine'?'<span class="tag">'+esc(f.lic)+'</span>':'')+'<span class="status"></span></div>'+body(f)+mine+'</article>'}
 function render(){
   document.body.classList.toggle('inv',S.inv);
   $('#vList').setAttribute('aria-pressed',S.view==='list');$('#vHand').setAttribute('aria-pressed',S.view==='hand');
