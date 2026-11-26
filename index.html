@@ -88,15 +88,16 @@ h2 b{color:var(--ink)}
 .bub.ok{opacity:1}
 .bub svg{width:0;height:0;min-width:100%;min-height:100%;overflow:visible}
 .bub .sh{fill:var(--card);stroke:var(--ink);stroke-width:2.2;vector-effect:non-scaling-stroke;stroke-linejoin:round}
-.btxt{position:relative;line-height:1.4;white-space:pre-wrap;--pv:2em;--ph:2.2em;padding:var(--pv) var(--ph)}
+.btxt{position:relative;line-height:1.4;display:grid;place-items:center;text-align:center;--pv:2em;--ph:2.2em;padding:var(--pv) var(--ph)}
 .bub.vert .btxt{writing-mode:vertical-rl;-webkit-writing-mode:vertical-rl;height:calc(var(--n,10)*1em + var(--pv)*2);width:max-content}
 .b-box .btxt{--pv:.8em;--ph:1em}.b-shout .btxt{--pv:3.2em;--ph:3.2em}.b-cloud .btxt{--pv:1.9em;--ph:2.1em}
 .inv .bub .sh{fill:var(--ink);stroke:var(--card)}.inv .btxt{color:var(--card)}
+.bin{white-space:pre-wrap;max-width:100%;max-height:100%}
 .tag.warn{border-color:var(--aka);color:var(--aka)}
 #bubType{flex-wrap:wrap}
 .bub.fix{width:var(--bw);height:var(--bh)}
-.bub.fix .btxt{height:auto!important;width:auto!important;padding:var(--fp)!important;overflow:hidden}
-.bub.fix.b-oval{--fp:17% 15%}.bub.fix.b-shout{--fp:25% 22%}.bub.fix.b-cloud{--fp:19% 17%}.bub.fix.b-box{--fp:7% 7%}
+.bub.fix .btxt{height:auto!important;width:auto!important;padding:calc(var(--bh)*var(--fy)) calc(var(--bw)*var(--fx))!important;overflow:hidden}
+.bub.fix.b-oval{--fy:.13;--fx:.15}.bub.fix.b-shout{--fy:.2;--fx:.2}.bub.fix.b-cloud{--fy:.16;--fx:.17}.bub.fix.b-box{--fy:.07;--fx:.07}
 .bub.overflow .sh{stroke:var(--aka)}
 </style>
 </head>
@@ -191,7 +192,7 @@ function visible(){const q=S.q.trim().toLowerCase();return fonts.filter(f=>(S.ca
 function body(f){
   const st='font-family:"'+esc(f.fam)+'";font-weight:'+S.wght;
   if(S.view==='hand')return '<div class="hand" style="--c:'+Math.max(56,S.size*2.4)+'px">'+handChars().map(c=>'<div class="cell'+(S.grid?'':' nogrid')+'" style=\''+st+'\'>'+esc(c)+'</div>').join('')+'</div>';
-  if(S.view==='bub')return '<div class="bubwrap"><div class="bub b-'+S.bt+(S.bvert?' vert':'')+(S.bfix?' fix':'')+'" style="'+bubDim()+'"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'+SH[S.bt]+'</svg><div class="btxt" style=\''+st+';font-size:'+S.bsize+'px;--n:'+bubN()+'\'>'+esc(S.text)+'</div></div></div>';
+  if(S.view==='bub')return '<div class="bubwrap"><div class="bub b-'+S.bt+(S.bvert?' vert':'')+(S.bfix?' fix':'')+'" style="'+bubDim()+'"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'+SH[S.bt]+'</svg><div class="btxt" style=\''+st+';font-size:'+S.bsize+'px;--n:'+bubN()+'\'><span class="bin">'+esc(S.text)+'</span></div></div></div>';
   return '<div class="sample'+(S.vert?' vert':'')+'" style=\''+st+';font-size:'+S.size+'px\'>'+esc(S.text)+'</div>'}
 function card(f){
   const fav=S.fav.has(f.id),pin=S.pin.has(f.id);
@@ -249,7 +250,7 @@ document.addEventListener('change',e=>{const t=e.target;if(t.dataset.act==='tag'
   if(t.dataset.oid){t.checked?S.over.delete(t.dataset.oid):S.over.add(t.dataset.oid);save();renderOver()}});
 document.addEventListener('input',e=>{const t=e.target;if(t.dataset.act==='memo'){const id=t.closest('.card').dataset.id,f=fonts.find(x=>x.id===id);f.lic=t.value;clearTimeout(t._h);t._h=setTimeout(()=>upd(id,{lic:t.value}),400)}});
 const txt=$('#text');txt.value=S.text;
-txt.addEventListener('input',()=>{S.text=txt.value;save();clearTimeout(txt._h);txt._h=setTimeout(()=>{if(S.view==='hand')render();else{document.querySelectorAll('.sample,.btxt').forEach(s=>{s.textContent=S.text;if(s.classList.contains('btxt'))s.style.setProperty('--n',bubN())});checkOver()}},150)});
+txt.addEventListener('input',()=>{S.text=txt.value;save();clearTimeout(txt._h);txt._h=setTimeout(()=>{if(S.view==='hand')render();else{document.querySelectorAll('.sample').forEach(s=>s.textContent=S.text);document.querySelectorAll('.btxt').forEach(s=>{s.querySelector('.bin').textContent=S.text;s.style.setProperty('--n',bubN())});checkOver()}},150)});
 $('#q').addEventListener('input',e=>{S.q=e.target.value;clearTimeout(e.target._h);e.target._h=setTimeout(render,150)});
 const sz=$('#size');
 function setSize(v){v=Math.max(10,Math.min(96,v));sz.value=v;$('#sv').textContent=v;
