@@ -251,6 +251,12 @@ for(const k of ['fav','over'])S[k]=new Set(ls.get(k,[]));ls.get('pin',[]).forEac
 function save(){for(const k in DEF)ls.set(k,S[k]);for(const k of ['fav','over'])ls.set(k,[...S[k]])}
 let fonts=G.map(([n,t])=>({id:'g:'+n,name:n,fam:n,tags:t.split(' ').concat(W[n]?['w']:[]),src:'google',lic:'OFLなど（Google Fonts）',w:W[n]||''}))
   .concat(B.map(([n,t,u])=>({id:'b:'+n,name:n,fam:'bundled-'+n,tags:t.split(' '),src:'bundled',url:u,lic:'M+ FONTSライセンス（改変・再配布・商用可）'})));
+// 端末に入っている書体（ファイルは配らず、表示だけ借りる）。入っていない端末では出さない
+const L=[['Hiragino Sans','ヒラギノ角ゴ（この端末）','g']];
+function hasLocal(fam){// 「その書体, serif」と「その書体, monospace」を絵にして比べる。書体があれば両方同じ絵になる
+  const c=document.createElement('canvas');c.width=360;c.height=60;const x=c.getContext('2d'),img=f=>{x.clearRect(0,0,360,60);x.font='40px '+f;x.textBaseline='middle';x.fillText('永あRg',4,30);return x.getImageData(0,0,360,60).data.join()};
+  return img("'"+fam+"', serif")===img("'"+fam+"', monospace")&&img('serif')!==img('monospace')}
+L.forEach(([fam,name,t])=>{if(hasLocal(fam))fonts.splice(0,0,{id:'l:'+fam,name,fam,tags:[t,'w'],src:'local',lic:'端末に入っている書体（表示だけ借りる。ファイルは配らない）'})});
 const byId=id=>fonts.find(f=>f.id===id);
 function mkCombo([a,b]){const A=byId(a),K=byId(b);if(!A||!K)return null;return{id:'c:'+a+'|'+b,name:'かな '+A.name+' ＋ 漢字 '+K.name,fam:K.fam,parts:[A,K],tags:['combo'],src:'combo',lic:'それぞれの書体の利用条件に従う'}}
 function buildCombos(){fonts=fonts.filter(f=>f.src!=='combo').concat(S.combos.map(mkCombo).filter(Boolean))}
