@@ -32,7 +32,7 @@ input[type=search]{flex:1 1 160px}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
 .seg button{border:0;background:var(--card);min-height:40px;padding:0 14px;cursor:pointer}
 .seg button[aria-pressed=true]{background:var(--aka);color:#fff}
-.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
 .chips .chip{flex:none;min-height:34px;font-size:14px}
 label.size{display:flex;gap:6px;align-items:center;font-size:14px;color:var(--sub)}
 input[type=range]{width:120px;accent-color:var(--aka)}
@@ -54,7 +54,7 @@ h2 b{color:var(--ink)}
 .sample{line-height:1.45;overflow-wrap:anywhere;white-space:pre-wrap;transition:opacity .3s;opacity:.12}
 .sample.ok{opacity:1}
 .sample.vert{writing-mode:vertical-rl;max-height:22em;overflow-x:auto}
-.inv .sample,.inv .cell{background:#111;color:#f3f2ec}
+.inv .sample,.inv .cell,.inv .over .big{background:var(--ink);color:var(--card)}
 .inv .sample{padding:10px;border-radius:8px}
 .status{font-size:12px;color:var(--aka)}
 .hand{display:flex;flex-wrap:wrap;gap:6px}
@@ -100,7 +100,7 @@ h2 b{color:var(--ink)}
     <button class="btn" id="grid" aria-pressed="true">補助線</button>
     <label class="btn" style="display:inline-flex;align-items:center">＋フォントを追加<input type="file" id="file" accept=".ttf,.otf,.woff,.woff2" multiple class="hide"></label>
   </div>
-  <div class="row"><div class="chips" id="chips"></div></div>
+  <div class="chips" id="chips" style="margin-top:8px"></div>
 </header>
 <main>
   <section id="overSec" class="hide">
@@ -133,7 +133,7 @@ h2 b{color:var(--ink)}
 // 分類: g ゴシック / m 明朝 / r 丸 / a アンチゴチ / h 手書き / f 筆・楷書 / p ポップ / d 個性派 / dot ドット / t 手本向き
 const CATS=[['all','すべて'],['fav','★お気に入り'],['mine','自分のフォント'],['t','手書きの手本向き'],['g','ゴシック'],['m','明朝'],['r','丸ゴシック'],['a','アンチック'],['h','手書き風'],['f','筆・楷書'],['p','ポップ'],['d','個性派'],['dot','ドット']];
 const TAGN=Object.fromEntries(CATS);
-const G=[['Noto Sans JP','g'],['Noto Serif JP','m'],['BIZ UDPGothic','g'],['BIZ UDGothic','g'],['BIZ UDPMincho','m'],['BIZ UDMincho','m'],['M PLUS 1p','g'],['M PLUS 1','g'],['M PLUS 2','g'],['M PLUS Rounded 1c','r'],['M PLUS 1 Code','g'],['Kosugi','g'],['Kosugi Maru','r'],['Sawarabi Gothic','g'],['Sawarabi Mincho','m'],['Zen Kaku Gothic New','g'],['Zen Kaku Gothic Antique','g'],['Zen Maru Gothic','r'],['Zen Old Mincho','m'],['Zen Antique','m a'],['Zen Antique Soft','m a'],['Zen Kurenaido','h t'],['Shippori Mincho','m'],['Shippori Mincho B1','m'],['Shippori Antique','a'],['Shippori Antique B1','a'],['Kaisei Opti','m'],['Kaisei Tokumin','m d'],['Kaisei Decol','m d'],['Kaisei HarunoUmi','m'],['Hina Mincho','m'],['Aoboshi One','m d'],['New Tegomin','m h'],['Murecho','g'],['IBM Plex Sans JP','g'],['LINE Seed JP','g'],['Tsukimi Rounded','r'],['Kiwi Maru','r'],['Klee One','h t'],['Yomogi','h'],['Yusei Magic','h p'],['Hachi Maru Pop','p h'],['Slackside One','h'],['Darumadrop One','p h'],['Yuji Syuku','f t'],['Yuji Mai','f'],['Yuji Boku','f'],['Yuji Hentaigana Akari','f'],['Yuji Hentaigana Akebono','f'],['Mochiy Pop One','p'],['Mochiy Pop P One','p'],['Potta One','p'],['Cherry Bomb One','p'],['Dela Gothic One','d'],['RocknRoll One','d'],['Reggae One','d'],['Rampart One','d'],['Train One','d'],['Stick','d'],['Monomaniac One','d'],['Chokokutai','d'],['Shizuru','d'],['WDXL Lubrifont JP N','d'],['DotGothic16','dot']];
+const G=[['Noto Sans JP','g'],['Noto Serif JP','m'],['BIZ UDPGothic','g'],['BIZ UDGothic','g'],['BIZ UDPMincho','m'],['BIZ UDMincho','m'],['M PLUS 1p','g'],['M PLUS 1','g'],['M PLUS 2','g'],['M PLUS Rounded 1c','r'],['M PLUS 1 Code','g'],['Kosugi','g'],['Kosugi Maru','r'],['Sawarabi Gothic','g'],['Sawarabi Mincho','m'],['Zen Kaku Gothic New','g'],['Zen Kaku Gothic Antique','g'],['Zen Maru Gothic','r'],['Zen Old Mincho','m'],['Zen Antique','m a'],['Zen Antique Soft','m a'],['Zen Kurenaido','h t'],['Shippori Mincho','m'],['Shippori Mincho B1','m'],['Shippori Antique','a'],['Shippori Antique B1','a'],['Kaisei Opti','m'],['Kaisei Tokumin','m d'],['Kaisei Decol','m d'],['Kaisei HarunoUmi','m'],['Hina Mincho','m'],['Aoboshi One','m d'],['New Tegomin','m h'],['Murecho','g'],['IBM Plex Sans JP','g'],['LINE Seed JP','g'],['Tsukimi Rounded','r'],['Kiwi Maru','r'],['Klee One','h t'],['Yomogi','h'],['Yusei Magic','h p'],['Hachi Maru Pop','p h'],['Slackside One','h'],['Darumadrop One','p h'],['Yuji Syuku','f t'],['Yuji Mai','f'],['Yuji Boku','f'],['Yuji Hentaigana Akari','f'],['Yuji Hentaigana Akebono','f'],['Mochiy Pop One','p'],['Mochiy Pop P One','p'],['Potta One','p'],['Cherry Bomb One','p'],['Dela Gothic One','d'],['RocknRoll One','d'],['Reggae One','d'],['Rampart One','d'],['Train One','d'],['Stick','d'],['Monomaniac One','d'],['Chokokutai','d'],['Shizuru','d'],['WDXL Lubrifont JP N','d'],['DotGothic16','dot'],['M PLUS U','g'],['Otomanopee One','d'],['Kapakana','h'],['Rock 3D','d'],['Palette Mosaic','d']];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ls={get(k,d){try{const v=localStorage.getItem('mihon:'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('mihon:'+k,JSON.stringify(v))}catch(e){}}};
