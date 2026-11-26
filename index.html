@@ -157,7 +157,7 @@ dialog textarea{width:100%;height:160px;font-size:13px;font-family:ui-monospace,
   <div class="row">
     <input type="search" id="q" placeholder="書体名で検索" aria-label="書体名で検索">
     <span class="size"><span id="sizeL">大きさ</span> <button class="ic" id="sMinus" aria-label="小さく">－</button><input type="range" id="size" min="10" max="96" value="32" aria-label="文字の大きさ"><button class="ic" id="sPlus" aria-label="大きく">＋</button> <span id="sv">32</span>px</span>
-    <span class="size">太さ <input type="range" id="wght" min="100" max="900" step="100" value="400" aria-label="太さ"> <span id="wv">400</span></span>
+    <span class="size">太さ <button class="ic" id="wMinus" aria-label="細く">－</button><input type="range" id="wght" min="100" max="900" step="100" value="400" aria-label="太さ"><button class="ic" id="wPlus" aria-label="太く">＋</button> <span id="wv">400</span></span>
   </div>
   <div class="row">
     <button class="btn" id="vert" aria-pressed="false">縦書き</button>
@@ -452,7 +452,9 @@ function setSize(v){v=Math.max(10,Math.min(96,v));sz.value=v;$('#sv').textConten
   save()}
 sz.addEventListener('input',()=>setSize(+sz.value));
 $('#sMinus').onclick=()=>setSize(+sz.value-2);$('#sPlus').onclick=()=>setSize(+sz.value+2);
-$('#wght').addEventListener('input',e=>{S.wght=+e.target.value;$('#wv').textContent=S.wght;save();clearTimeout(e.target._h);e.target._h=setTimeout(()=>{render();recheckAll()},150)});
+function setW(v){v=Math.max(100,Math.min(900,v));const w=$('#wght');w.value=v;S.wght=v;$('#wv').textContent=v;save();clearTimeout(w._h);w._h=setTimeout(()=>{render();recheckAll()},150)}
+$('#wght').addEventListener('input',e=>setW(+e.target.value));
+$('#wMinus').onclick=()=>setW(S.wght-100);$('#wPlus').onclick=()=>setW(S.wght+100);
 $('#vert').onclick=()=>{if(S.view==='bub')S.bvert=!S.bvert;else S.vert=!S.vert;save();render()};
 $('#inv').onclick=()=>{S.inv=!S.inv;save();render()};$('#grid').onclick=()=>{S.grid=!S.grid;save();render()};
 $('#bmax').addEventListener('input',e=>{S.bmax=+e.target.value;$('#bmv').textContent=S.bmax;save();$$('.btxt').forEach(x=>x.style.setProperty('--n',bubN()));fitAll()});
