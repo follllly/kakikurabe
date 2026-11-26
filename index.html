@@ -83,13 +83,14 @@ h2 b{color:var(--ink)}
 .hide{display:none!important}
 .sample,.cell,.btxt,.over .big span{font-synthesis:none}
 .bubwrap{display:flex;justify-content:center;padding:8px 4px}
-.bub{position:relative;display:inline-block;max-width:100%;opacity:.12;transition:opacity .3s}
+.bub{display:inline-grid;max-width:100%;opacity:.12;transition:opacity .3s}
+.bub>*{grid-area:1/1}
 .bub.ok{opacity:1}
-.bub svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.bub svg{width:0;height:0;min-width:100%;min-height:100%;overflow:visible}
 .bub .sh{fill:var(--card);stroke:var(--ink);stroke-width:2.2;vector-effect:non-scaling-stroke;stroke-linejoin:round}
-.btxt{position:relative;line-height:1.4;white-space:pre-wrap;padding:2em 2.2em}
-.bub.vert .btxt{writing-mode:vertical-rl;max-height:14em}
-.b-box .btxt{padding:.8em 1em}.b-shout .btxt{padding:3.2em 3.2em}.b-cloud .btxt{padding:1.9em 2.1em}
+.btxt{position:relative;line-height:1.4;white-space:pre-wrap;--pv:2em;--ph:2.2em;padding:var(--pv) var(--ph)}
+.bub.vert .btxt{writing-mode:vertical-rl;-webkit-writing-mode:vertical-rl;height:calc(var(--n,10)*1em + var(--pv)*2);width:max-content}
+.b-box .btxt{--pv:.8em;--ph:1em}.b-shout .btxt{--pv:3.2em;--ph:3.2em}.b-cloud .btxt{--pv:1.9em;--ph:2.1em}
 .inv .bub .sh{fill:var(--ink);stroke:var(--card)}.inv .btxt{color:var(--card)}
 .tag.warn{border-color:var(--aka);color:var(--aka)}
 #bubType{flex-wrap:wrap}
@@ -178,12 +179,13 @@ const SH=(()=>{let sp=[];for(let i=0;i<32;i++){const a=i/32*Math.PI*2,r=i%2?37:4
   let n=13,pts=[];for(let i=0;i<n;i++){const a=i/n*Math.PI*2;pts.push([50+44*Math.cos(a),50+44*Math.sin(a)])}
   let d='M'+pts[0].map(v=>v.toFixed(1)).join(',');for(let i=1;i<=n;i++){const q=pts[i%n];d+=' A12,12 0 0 1 '+q.map(v=>v.toFixed(1)).join(',')}
   return{oval:'<ellipse class="sh" cx="50" cy="50" rx="49" ry="49"/>',box:'<rect class="sh" x="1" y="1" width="98" height="98"/>',shout:'<polygon class="sh" points="'+sp.join(' ')+'"/>',cloud:'<path class="sh" d="'+d+'Z"/>'}})();
+function bubN(){const L=S.text.split('\n').map(l=>[...l].length);return Math.max(1,Math.min(12,Math.max(...L)))}
 function handChars(){const c=[...S.text.replace(/\s/g,'')];return c.slice(0,6)}
 function visible(){const q=S.q.trim().toLowerCase();return fonts.filter(f=>(S.cat==='all'||(S.cat==='fav'?S.fav.has(f.id):S.cat==='mine'?f.src==='mine':f.tags.includes(S.cat)))&&(!q||f.name.toLowerCase().includes(q)))}
 function body(f){
   const st='font-family:"'+esc(f.fam)+'";font-weight:'+S.wght;
   if(S.view==='hand')return '<div class="hand" style="--c:'+Math.max(56,S.size*2.4)+'px">'+handChars().map(c=>'<div class="cell'+(S.grid?'':' nogrid')+'" style=\''+st+'\'>'+esc(c)+'</div>').join('')+'</div>';
-  if(S.view==='bub')return '<div class="bubwrap"><div class="bub b-'+S.bt+(S.bvert?' vert':'')+'"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'+SH[S.bt]+'</svg><div class="btxt" style=\''+st+';font-size:'+S.bsize+'px\'>'+esc(S.text)+'</div></div></div>';
+  if(S.view==='bub')return '<div class="bubwrap"><div class="bub b-'+S.bt+(S.bvert?' vert':'')+'"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'+SH[S.bt]+'</svg><div class="btxt" style=\''+st+';font-size:'+S.bsize+'px;--n:'+bubN()+'\'>'+esc(S.text)+'</div></div></div>';
   return '<div class="sample'+(S.vert?' vert':'')+'" style=\''+st+';font-size:'+S.size+'px\'>'+esc(S.text)+'</div>'}
 function card(f){
   const fav=S.fav.has(f.id),pin=S.pin.has(f.id);
@@ -241,7 +243,7 @@ document.addEventListener('change',e=>{const t=e.target;if(t.dataset.act==='tag'
   if(t.dataset.oid){t.checked?S.over.delete(t.dataset.oid):S.over.add(t.dataset.oid);save();renderOver()}});
 document.addEventListener('input',e=>{const t=e.target;if(t.dataset.act==='memo'){const id=t.closest('.card').dataset.id,f=fonts.find(x=>x.id===id);f.lic=t.value;clearTimeout(t._h);t._h=setTimeout(()=>upd(id,{lic:t.value}),400)}});
 const txt=$('#text');txt.value=S.text;
-txt.addEventListener('input',()=>{S.text=txt.value;save();clearTimeout(txt._h);txt._h=setTimeout(()=>{if(S.view==='hand')render();else{document.querySelectorAll('.sample,.btxt').forEach(s=>s.textContent=S.text)}},150)});
+txt.addEventListener('input',()=>{S.text=txt.value;save();clearTimeout(txt._h);txt._h=setTimeout(()=>{if(S.view==='hand')render();else{document.querySelectorAll('.sample,.btxt').forEach(s=>{s.textContent=S.text;if(s.classList.contains('btxt'))s.style.setProperty('--n',bubN())})}},150)});
 $('#q').addEventListener('input',e=>{S.q=e.target.value;clearTimeout(e.target._h);e.target._h=setTimeout(render,150)});
 const sz=$('#size');
 function setSize(v){v=Math.max(10,Math.min(96,v));sz.value=v;$('#sv').textContent=v;
