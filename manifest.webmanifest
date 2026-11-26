@@ -1,6 +1,6 @@
 {
-  "name": "書体見本帳",
-  "short_name": "書体見本帳",
+  "name": "かきくらべ",
+  "short_name": "かきくらべ",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
