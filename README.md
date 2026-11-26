@@ -2,7 +2,7 @@
 
 日本語フォントを一覧で見比べるための、1枚で動くWebページです。iPadのブラウザでの利用を想定しています。
 
-**開く：** https://follllly.github.io/shotai-mihoncho/
+**開く：** https://follllly.github.io/kakikurabe/
 
 ## できること
 
