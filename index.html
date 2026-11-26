@@ -434,6 +434,7 @@ $('#panelBtn').onclick=()=>{const p=$('#panel');if(S.panel&&p.getBoundingClientR
 $('#comboBtn').onclick=()=>{S.combo=!S.combo;if(S.combo)fillComboSelects();render()};
 $('#cAdd').onclick=()=>{const a=$('#cKana').value,k=$('#cKanji').value;if(!a||!k)return;if(a===k){toast('かなと漢字に別の書体を選んでください');return}
   const id='c:'+a+'|'+k;if(!S.combos.some(([x,y])=>x===a&&y===k))S.combos.push([a,k]);buildCombos();S.pin.add(id);save();render();toast('組み合わせをピン留めしました')};
+if(!/github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname))$('#dSave').classList.add('hide');
 $('#dataBtn').onclick=()=>{$('#dataTxt').value=exportData();$('#dataDlg').showModal()};
 $('#dClose').onclick=()=>$('#dataDlg').close();
 $('#dCopy').onclick=async()=>{try{await navigator.clipboard.writeText($('#dataTxt').value);toast('コピーしました')}catch(e){$('#dataTxt').select();toast('選択しました。長押しでコピーしてください')}};
