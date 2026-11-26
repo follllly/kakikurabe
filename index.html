@@ -34,7 +34,7 @@ input[type=search]{flex:1 1 160px}
 .seg button[aria-pressed=true]{background:var(--aka);color:#fff}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chips .chip{flex:none;min-height:34px;font-size:14px}
-label.size{display:flex;gap:6px;align-items:center;font-size:14px;color:var(--sub)}
+label.size,span.size{display:flex;gap:6px;align-items:center;font-size:14px;color:var(--sub)}
 input[type=range]{width:120px;accent-color:var(--aka)}
 :focus-visible{outline:2px solid var(--aka);outline-offset:2px}
 main{padding:16px max(4vw,14px) 40px}
@@ -106,7 +106,7 @@ h2 b{color:var(--ink)}
   </div>
   <div class="row">
     <input type="search" id="q" placeholder="書体名で検索" aria-label="書体名で検索">
-    <label class="size">大きさ <input type="range" id="size" min="14" max="96" value="32"></label>
+    <span class="size"><span id="sizeL">大きさ</span> <button class="ic" id="sMinus" aria-label="小さく">－</button><input type="range" id="size" min="10" max="96" value="32" aria-label="文字の大きさ"><button class="ic" id="sPlus" aria-label="大きく">＋</button> <span id="sv">32</span>px</span>
     <label class="size">太さ <input type="range" id="wght" min="100" max="900" step="100" value="400"> <span id="wv">400</span></label>
     <button class="btn" id="vert" aria-pressed="false">縦書き</button>
     <button class="btn" id="inv" aria-pressed="false">白黒反転</button>
@@ -156,13 +156,13 @@ const G=[['Noto Sans JP','g'],['Noto Serif JP','m'],['BIZ UDPGothic','g'],['BIZ 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ls={get(k,d){try{const v=localStorage.getItem('mihon:'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('mihon:'+k,JSON.stringify(v))}catch(e){}}};
-const S={text:ls.get('text','吹き出しに入れるセリフ\nあいうえお アイウエオ 永遠の書'),size:ls.get('size',32),view:ls.get('view','list'),cat:ls.get('cat','all'),q:'',vert:ls.get('vert',false),bvert:ls.get('bvert',true),bt:ls.get('bt','oval'),wght:ls.get('wght',400),inv:ls.get('inv',false),grid:ls.get('grid',true),fav:new Set(ls.get('fav',[])),pin:new Set(ls.get('pin',[])),over:new Set(ls.get('over',[])),overCh:0};
+const S={text:ls.get('text','吹き出しに入れるセリフ\nあいうえお アイウエオ 永遠の書'),size:ls.get('size',32),view:ls.get('view','list'),cat:ls.get('cat','all'),q:'',vert:ls.get('vert',false),bvert:ls.get('bvert',true),bt:ls.get('bt','oval'),wght:ls.get('wght',400),bsize:ls.get('bsize',22),inv:ls.get('inv',false),grid:ls.get('grid',true),fav:new Set(ls.get('fav',[])),pin:new Set(ls.get('pin',[])),over:new Set(ls.get('over',[])),overCh:0};
 const W={"Shippori Mincho":"400;500;600;700;800","Tsukimi Rounded":"300;400;500;600;700","Zen Maru Gothic":"300;400;500;700;900","Kaisei HarunoUmi":"400;500;700","BIZ UDGothic":"400;700","Zen Kaku Gothic Antique":"300;400;500;700;900","BIZ UDPMincho":"400;700","Kapakana":"300..400","M PLUS 1p":"100;300;400;500;700;800;900","BIZ UDPGothic":"400;700","Kaisei Tokumin":"400;500;700;800","Noto Serif JP":"200..900","Kaisei Decol":"400;500;700","Klee One":"400;600","LINE Seed JP":"100;400;700;800","M PLUS Rounded 1c":"100;300;400;500;700;800;900","M PLUS 2":"100..900","BIZ UDMincho":"400;700","Zen Old Mincho":"400;500;600;700;900","Zen Kaku Gothic New":"300;400;500;700;900","M PLUS U":"100..900","M PLUS 1 Code":"100..700","Kaisei Opti":"400;500;700","Kiwi Maru":"300;400;500","Shippori Mincho B1":"400;500;600;700;800","M PLUS 1":"100..900","IBM Plex Sans JP":"100;200;300;400;500;600;700","Murecho":"100..900","Noto Sans JP":"100..900"};
 const B=[['PixelMplus10','dot','fonts/pixelmplus/PixelMplus10-Regular.ttf'],['PixelMplus12','dot','fonts/pixelmplus/PixelMplus12-Regular.ttf']];
 let fonts=G.map(([n,t])=>({id:'g:'+n,name:n,fam:n,tags:t.split(' ').concat(W[n]?['w']:[]),src:'google',lic:'OFLなど（Google Fonts）',w:W[n]||''})).concat(B.map(([n,t,u])=>({id:'b:'+n,name:n,fam:'bundled-'+n,tags:t.split(' '),src:'bundled',url:u,lic:'M+ FONTSライセンス（改変・再配布・商用可）'})));
 const loaded={};
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),1600)}
-function save(){ls.set('text',S.text);ls.set('size',S.size);ls.set('view',S.view);ls.set('cat',S.cat);ls.set('vert',S.vert);ls.set('bvert',S.bvert);ls.set('bt',S.bt);ls.set('wght',S.wght);ls.set('inv',S.inv);ls.set('grid',S.grid);ls.set('fav',[...S.fav]);ls.set('pin',[...S.pin]);ls.set('over',[...S.over])}
+function save(){ls.set('text',S.text);ls.set('size',S.size);ls.set('view',S.view);ls.set('cat',S.cat);ls.set('vert',S.vert);ls.set('bvert',S.bvert);ls.set('bt',S.bt);ls.set('wght',S.wght);ls.set('bsize',S.bsize);ls.set('inv',S.inv);ls.set('grid',S.grid);ls.set('fav',[...S.fav]);ls.set('pin',[...S.pin]);ls.set('over',[...S.over])}
 function ensure(f){
   if(loaded[f.id])return loaded[f.id];
   if(f.src==='google'){const l=document.createElement('link');l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family='+encodeURIComponent(f.name).replace(/%20/g,'+')+(f.w?':wght@'+f.w:'')+'&display=swap';document.head.appendChild(l);
@@ -183,7 +183,7 @@ function visible(){const q=S.q.trim().toLowerCase();return fonts.filter(f=>(S.ca
 function body(f){
   const st='font-family:"'+esc(f.fam)+'";font-weight:'+S.wght;
   if(S.view==='hand')return '<div class="hand" style="--c:'+Math.max(56,S.size*2.4)+'px">'+handChars().map(c=>'<div class="cell'+(S.grid?'':' nogrid')+'" style=\''+st+'\'>'+esc(c)+'</div>').join('')+'</div>';
-  if(S.view==='bub')return '<div class="bubwrap"><div class="bub b-'+S.bt+(S.bvert?' vert':'')+'"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'+SH[S.bt]+'</svg><div class="btxt" style=\''+st+';font-size:'+S.size+'px\'>'+esc(S.text)+'</div></div></div>';
+  if(S.view==='bub')return '<div class="bubwrap"><div class="bub b-'+S.bt+(S.bvert?' vert':'')+'"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'+SH[S.bt]+'</svg><div class="btxt" style=\''+st+';font-size:'+S.bsize+'px\'>'+esc(S.text)+'</div></div></div>';
   return '<div class="sample'+(S.vert?' vert':'')+'" style=\''+st+';font-size:'+S.size+'px\'>'+esc(S.text)+'</div>'}
 function card(f){
   const fav=S.fav.has(f.id),pin=S.pin.has(f.id);
@@ -191,7 +191,7 @@ function card(f){
   return '<article class="card'+(pin?' pinned':'')+'" data-id="'+esc(f.id)+'"><div class="meta"><span class="nm">'+esc(f.name)+'</span><button class="ic fav'+(fav?' on':'')+'" data-act="fav" aria-label="お気に入り" aria-pressed="'+fav+'">'+(fav?'★':'☆')+'</button><button class="ic'+(pin?' on':'')+'" data-act="pin" aria-pressed="'+pin+'">ピン</button><button class="ic" data-act="copy">コピー</button>'+(f.src==='mine'?'<button class="ic" data-act="del">削除</button>':'')+'</div><div class="tags">'+f.tags.filter(t=>t!=='mine'&&t!=='w').map(t=>'<span class="tag">'+esc(TAGN[t]||t)+'</span>').join('')+(f.w?'<span class="tag">'+esc(wLabel(f))+'</span>':'')+(f.src==='google'&&!hasW(f,S.wght)?'<span class="tag warn">'+S.wght+'はなし（近い太さで表示）</span>':'')+(f.src!=='mine'?'<span class="tag">'+esc(f.lic)+'</span>':'')+'<span class="status"></span></div>'+body(f)+mine+'</article>'}
 function render(){
   document.body.classList.toggle('inv',S.inv);
-  $('#vList').setAttribute('aria-pressed',S.view==='list');$('#vBub').setAttribute('aria-pressed',S.view==='bub');$('#bubRow').classList.toggle('hide',S.view!=='bub');document.querySelectorAll('[data-bt]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.bt===S.bt));$('#wght').value=S.wght;$('#wv').textContent=S.wght;$('#vHand').setAttribute('aria-pressed',S.view==='hand');
+  $('#vList').setAttribute('aria-pressed',S.view==='list');$('#vBub').setAttribute('aria-pressed',S.view==='bub');$('#bubRow').classList.toggle('hide',S.view!=='bub');document.querySelectorAll('[data-bt]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.bt===S.bt));$('#wght').value=S.wght;const cs=S.view==='bub'?S.bsize:S.size;$('#size').value=cs;$('#sv').textContent=cs;$('#sizeL').textContent=S.view==='bub'?'吹き出しの文字':'大きさ';$('#wv').textContent=S.wght;$('#vHand').setAttribute('aria-pressed',S.view==='hand');
   $('#vert').setAttribute('aria-pressed',S.view==='bub'?S.bvert:S.vert);$('#inv').setAttribute('aria-pressed',S.inv);$('#grid').setAttribute('aria-pressed',S.grid);
   $('#vert').classList.toggle('hide',S.view==='hand');$('#grid').classList.toggle('hide',S.view!=='hand');
   $('#chips').innerHTML=CATS.map(([k,n])=>'<button class="chip" data-cat="'+k+'" aria-pressed="'+(S.cat===k)+'">'+n+'</button>').join('');
@@ -243,7 +243,13 @@ document.addEventListener('input',e=>{const t=e.target;if(t.dataset.act==='memo'
 const txt=$('#text');txt.value=S.text;
 txt.addEventListener('input',()=>{S.text=txt.value;save();clearTimeout(txt._h);txt._h=setTimeout(()=>{if(S.view==='hand')render();else{document.querySelectorAll('.sample,.btxt').forEach(s=>s.textContent=S.text)}},150)});
 $('#q').addEventListener('input',e=>{S.q=e.target.value;clearTimeout(e.target._h);e.target._h=setTimeout(render,150)});
-const sz=$('#size');sz.value=S.size;sz.addEventListener('input',()=>{S.size=+sz.value;save();if(S.view==='hand')render();else document.querySelectorAll('.sample,.btxt').forEach(s=>s.style.fontSize=S.size+'px')});
+const sz=$('#size');
+function setSize(v){v=Math.max(10,Math.min(96,v));sz.value=v;$('#sv').textContent=v;
+  if(S.view==='bub'){S.bsize=v;document.querySelectorAll('.btxt').forEach(e=>e.style.fontSize=v+'px')}
+  else{S.size=v;if(S.view==='hand'){clearTimeout(sz._h);sz._h=setTimeout(render,120)}else document.querySelectorAll('.sample').forEach(e=>e.style.fontSize=v+'px')}
+  save()}
+sz.addEventListener('input',()=>setSize(+sz.value));
+$('#sMinus').onclick=()=>setSize(+sz.value-2);$('#sPlus').onclick=()=>setSize(+sz.value+2);
 $('#vList').onclick=()=>{S.view='list';save();render()};$('#vHand').onclick=()=>{S.view='hand';save();render()};
 $('#vert').onclick=()=>{if(S.view==='bub')S.bvert=!S.bvert;else S.vert=!S.vert;save();render()};$('#vBub').onclick=()=>{S.view='bub';save();render()};document.querySelectorAll('[data-bt]').forEach(b=>b.onclick=()=>{S.bt=b.dataset.bt;save();render()});
 $('#wght').addEventListener('input',e=>{S.wght=+e.target.value;$('#wv').textContent=S.wght;save();clearTimeout(e.target._h);e.target._h=setTimeout(render,120)});$('#inv').onclick=()=>{S.inv=!S.inv;save();render()};$('#grid').onclick=()=>{S.grid=!S.grid;save();render()};
