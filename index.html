@@ -143,13 +143,13 @@ dialog textarea{width:100%;height:160px;font-size:13px;font-family:ui-monospace,
 <body>
 <header>
   <div class="hrow">
-    <h1>書体見本帳 <small id="count"></small></h1>
+    <h1>書体見本帳</h1>
     <button class="btn gear" id="panelBtn" aria-expanded="true" aria-controls="panel" aria-label="設定と絞り込み" title="設定と絞り込み"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M19.49,9.82 L22.07,10.40 L22.07,13.60 L19.49,14.18 L18.84,15.76 L20.25,18.00 L18.00,20.25 L15.76,18.84 L14.18,19.49 L13.60,22.07 L10.40,22.07 L9.82,19.49 L8.24,18.84 L6.00,20.25 L3.75,18.00 L5.16,15.76 L4.51,14.18 L1.93,13.60 L1.93,10.40 L4.51,9.82 L5.16,8.24 L3.75,6.00 L6.00,3.75 L8.24,5.16 L9.82,4.51 L10.40,1.93 L13.60,1.93 L14.18,4.51 L15.76,5.16 L18.00,3.75 L20.25,6.00 L18.84,8.24Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="12" r="3.3" fill="none" stroke="currentColor" stroke-width="1.7"/></svg></button>
   </div>
   <div class="row">
     <textarea id="text" aria-label="見本の文"></textarea>
     <div class="seg" role="group" aria-label="表示">
-      <button data-view="list">一覧</button><button data-view="bub">吹き出し</button><button data-view="hand">手書き参考</button>
+      <button data-view="list">一覧</button><button data-view="bub">吹き出し</button><button data-view="hand">参考</button>
     </div>
   </div>
 </header>
@@ -185,17 +185,16 @@ dialog textarea{width:100%;height:160px;font-size:13px;font-family:ui-monospace,
       <span class="lbl">漢字・英数</span><select id="cKanji" aria-label="漢字と英数の書体"></select>
       <button class="btn" id="cAdd">一覧に加える</button>
     </div>
-    <p>かな（ひらがな・カタカナ・句読点）と、それ以外の字を別々の書体で表示します。たとえば「かな Zen Antique ＋ 漢字 BIZ UDGothic」はアンチゴチの組み方です。</p>
   </div>
   <div class="chips" id="chips" style="margin-top:10px"></div>
 </section>
 <main>
   <section id="overSec" class="hide">
-    <h2><b>重ね表示</b> ★の書体を半透明で重ねます。濃く残る線がどの書体にも共通する骨組みです</h2>
+    <h2><b>重ね表示</b></h2>
     <div class="over"><div class="cell big" id="bigCell"></div><div><div class="row" id="overChars"></div><div class="legend" id="legend"></div></div></div>
   </section>
   
-  <section><h2 id="mainH"></h2><div class="grid" id="mainGrid"></div><p class="empty hide" id="empty"></p></section>
+  <section><div class="grid" id="mainGrid"></div><p class="empty hide" id="empty"></p></section>
   <details class="links">
     <summary>フリーフォントを探せる場所</summary>
     <p>ダウンロードした .ttf / .otf は「＋フォントを追加」で読み込めます。このブラウザの中にだけ保存され、次からも一覧に出ます。使う前に、各配布ページの利用条件（商用・同人誌での利用など）を必ず確かめてください。</p>
@@ -277,7 +276,7 @@ function ensure(f){
   else loaded[f.id]=Promise.resolve(true);
   return loaded[f.id]}
 const ready=new Set();
-function setWarn(card,key,text){const w=card.querySelector('.warns');if(!w)return;let s=w.querySelector('[data-w="'+key+'"]');if(text){if(!s){s=document.createElement('span');s.className='tag warn';s.dataset.w=key;w.appendChild(s)}s.textContent=text}else if(s)s.remove()}
+function setWarn(){}
 function onReady(f,card){ensure(f).then(ok=>{card.classList.remove('loading');card.classList.add('ok');if(!ok){setWarn(card,'fail','読み込めませんでした');return}ready.add(f.id);fitBub(card);checkOver(card);checkGlyphs(f,card)})}
 const io=new IntersectionObserver(es=>{for(const e of es)if(e.isIntersecting){io.unobserve(e.target);const f=byId(e.target.dataset.id);if(f)onReady(f,e.target)}},{rootMargin:'400px'});
 // 欠けた字の検出：2つの違う代わりの書体で描いて、絵が変わる字は入っていない
@@ -367,8 +366,8 @@ function openInfo(f){
   $('#infoBody').innerHTML=h+'</div>';ensure(f);$('#infoDlg').showModal()}
 function card(f){
   const fav=S.fav.has(f.id);
-  const warn=(!hasW(f,S.wght)?'<span class="tag warn" data-w="wt">'+S.wght+'はなし（近い太さで表示）</span>':'');
-  return '<article class="card loading" data-id="'+esc(f.id)+'"><div class="meta"><div class="nmw"><button class="nm" data-act="info" aria-label="'+esc(f.name)+'の詳しい情報">'+esc(f.name)+'</button></div><button class="ic fav'+(fav?' on':'')+'" data-act="fav" aria-label="お気に入り" aria-pressed="'+fav+'">'+(fav?'★':'☆')+'</button></div><div class="warns">'+warn+'</div>'+body(f)+'</article>'}
+  
+  return '<article class="card loading" data-id="'+esc(f.id)+'"><div class="meta"><div class="nmw"><button class="nm" data-act="info" aria-label="'+esc(f.name)+'の詳しい情報">'+esc(f.name)+'</button></div><button class="ic fav'+(fav?' on':'')+'" data-act="fav" aria-label="お気に入り" aria-pressed="'+fav+'">'+(fav?'★':'☆')+'</button></div>'+body(f)+'</article>'}
 function render(){
   document.body.classList.toggle('inv',S.inv);document.body.classList.toggle('paper',S.view==='bub');
   $('#panel').classList.toggle('hide',!S.panel);$('#panelBtn').setAttribute('aria-expanded',S.panel);
@@ -384,10 +383,7 @@ function render(){
   $('#chips').innerHTML=CATS.map(([k,n])=>'<button class="chip" data-cat="'+k+'" aria-pressed="'+(S.cat===k)+'">'+n+'</button>').join('');
   const vis=visible();
   $('#mainGrid').innerHTML=vis.map(card).join('');
-  const ttl=TAGN[S.cat]+(S.q.trim()?'「'+S.q.trim()+'」':'');
-  $('#mainH').innerHTML='<b>'+esc(ttl)+'</b> '+vis.length+'書体';
   $('#empty').textContent='条件に合う書体がありません。';$('#empty').classList.toggle('hide',vis.length>0);
-  const nc=fonts.filter(f=>f.src==='combo').length;$('#count').textContent=(fonts.length-nc)+'書体'+(nc?'＋組み合わせ'+nc:'');
   $$('.card').forEach(c=>{io.observe(c);fitBub(c)});watchBubs();
   renderOver()}
 function renderOver(){
